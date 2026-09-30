@@ -73,7 +73,7 @@ export function JuegosTab({
                         {[j.anio, j.tipo, j.desarrollador].filter(Boolean).join(' · ') || 'Sin ficha completa'}
                       </span>
                       <span className="jmeta jmeta-records">
-                        {j.total_scores} {j.total_scores === 1 ? 'récord' : 'récords'}
+                        {j.total_scores_all ?? j.total_scores ?? 0} {(j.total_scores_all ?? j.total_scores ?? 0) === 1 ? 'récord' : 'récords'}
                       </span>
                     </div>
                     {esAdmin && (

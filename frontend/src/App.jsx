@@ -1115,20 +1115,36 @@ export default function App() {
   const torneoJuego = selTorneoJuegoId ? juegos.find((j) => j.id === selTorneoJuegoId) : null
 
   function abrirDetalleJuego(j) {
-    const superTorneo = (torneos || []).find((t) => t.tipo === 'super' && t.juegos?.some((g) => g.id === j.id))
-    const mensualTorneo = (torneos || []).find((t) => t.tipo === 'mensual' && t.juegos?.some((g) => g.id === j.id))
+    // Contar puntuaciones en general y en supertorneos
+    const puntosGeneral = j.total_scores ?? 0
+    const puntosSuper = (j.total_scores_all ?? 0) - (j.total_scores ?? 0)
 
-    if (superTorneo) {
-      setSelTorneo(superTorneo)
-      setSelTorneoJuegoId(j.id)
+    // Lógica: si tiene en ambos, va al general (torneíto);
+    // si solo tiene en super, va al supertorneo;
+    // si solo tiene en general, va al general.
+    // Si no tiene en ninguno, va al general por defecto.
+
+    if (puntosGeneral > 0) {
+      // Tiene en general (con o sin supertorneo) → va al general/torneíto
+      setSel(j)
       setTab('ver')
-      setVerSubTab('supertorneos')
-    } else if (mensualTorneo) {
-      setSelTorneo(mensualTorneo)
-      setSelTorneoJuegoId(j.id)
-      setTab('ver')
-      setVerSubTab('torneos')
+      setVerSubTab('general')
+    } else if (puntosSuper > 0) {
+      // Solo tiene en supertorneo → busca supertorneo que contenga el juego
+      const superTorneo = (torneos || []).find((t) => t.tipo === 'super' && t.juegos?.some((g) => g.id === j.id))
+      if (superTorneo) {
+        setSelTorneo(superTorneo)
+        setSelTorneoJuegoId(j.id)
+        setTab('ver')
+        setVerSubTab('supertorneos')
+      } else {
+        // Fallback: si no hay supertorneo con este juego, aun así va al general
+        setSel(j)
+        setTab('ver')
+        setVerSubTab('general')
+      }
     } else {
+      // Sin puntos: por defecto va a general
       setSel(j)
       setTab('ver')
       setVerSubTab('general')
@@ -1208,7 +1224,7 @@ export default function App() {
             </button>
           )}
           <button className={tab === 'torneos' ? 'tab activa' : 'tab'} onClick={() => setTab('torneos')}>
-            <span className="tab-icon">🏅</span><span className="tab-label">RETOS Y TORNEOS</span> <span className="tab-badge">{torneosMensuales.length}</span>
+            <span className="tab-icon">🏅</span><span className="tab-label">RETOS Y TORNEOS</span> <span className="tab-badge">{torneosMensuales.length + torneosSuper.length}</span>
           </button>
           <button className={tab === 'juegos' ? 'tab activa' : 'tab'} onClick={() => setTab('juegos')}>
             <span className="tab-icon">🎮</span><span className="tab-label">JUEGOS</span> <span className="tab-badge">{juegos.length}</span>
@@ -1225,7 +1241,7 @@ export default function App() {
             <select className="tabs-select" value={tab} onChange={(e) => setTab(e.target.value)}>
               <option value="ver">🏆 PUNTUACIONES</option>
               {esAdmin && <option value="meter">✏️ NUEVO RÉCORD</option>}
-              <option value="torneos">🏅 RETOS Y TORNEOS ({torneosMensuales.length})</option>
+              <option value="torneos">🏅 RETOS Y TORNEOS ({torneosMensuales.length + torneosSuper.length})</option>
               <option value="juegos">🎮 JUEGOS ({juegos.length})</option>
               <option value="usuarios">👤 JUGADORES ({usuarios.length})</option>
               {esAdmin && <option value="parametros">🧩 PARÁMETROS ({parametros.length})</option>}
