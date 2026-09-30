@@ -1,0 +1,10 @@
+# Uploads de usuario (logos, carátulas, capturas subidas desde la web)
+backend/uploads/
+
+# Dependencias y build del frontend
+frontend/node_modules/
+frontend/dist/
+
+# Sistema
+.DS_Store
+Thumbs.db
