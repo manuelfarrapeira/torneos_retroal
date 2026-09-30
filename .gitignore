@@ -5,8 +5,15 @@ backend/uploads/
 frontend/node_modules/
 frontend/dist/
 
+# Dependencias de orquestación (npm run dev en raíz)
+node_modules/
+package-lock.json
+
 # Carpeta de despliegue antigua/obsoleta
 deploy/
+
+# Configuración local del IDE (WebStorm/IntelliJ)
+.idea/
 
 # Sistema
 .DS_Store
