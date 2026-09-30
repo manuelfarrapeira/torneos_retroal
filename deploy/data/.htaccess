@@ -1,2 +1,0 @@
-# Impide el acceso web directo a la base de datos SQLite.
-Require all denied
