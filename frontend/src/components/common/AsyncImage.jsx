@@ -8,7 +8,7 @@ export function esMediaMp4(url) {
 
 // Componente para cargar imágenes y vídeos MP4 de forma asíncrona sin bloquear el renderizado ni peticiones de la API,
 // mostrando un pequeño spinner neon mientras se descarga la imagen o vídeo.
-export function AsyncImage({ src, alt = '', className = '', style = {} }) {
+export function AsyncImage({ src, alt = '', className = '', style = {}, imgStyle = {} }) {
   const isVideo = esMediaMp4(src)
   const [cargado, setCargado] = useState(isVideo)
   const [error, setError] = useState(false)
@@ -51,7 +51,8 @@ export function AsyncImage({ src, alt = '', className = '', style = {} }) {
           className={className}
           style={{
             opacity: cargado ? 1 : 0.4,
-            transition: 'opacity 0.2s ease-in'
+            transition: 'opacity 0.2s ease-in',
+            ...imgStyle,
           }}
         />
       ) : (
@@ -65,7 +66,8 @@ export function AsyncImage({ src, alt = '', className = '', style = {} }) {
           className={className}
           style={{
             opacity: cargado ? 1 : 0.2,
-            transition: 'opacity 0.25s ease-in'
+            transition: 'opacity 0.25s ease-in',
+            ...imgStyle,
           }}
         />
       )}

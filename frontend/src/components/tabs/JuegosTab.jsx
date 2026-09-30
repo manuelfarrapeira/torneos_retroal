@@ -1,5 +1,5 @@
-import { esMediaMp4 } from '../common/AsyncImage'
-import { LogoThumb } from '../common/LogoThumb'
+import { AsyncImage } from '../common/AsyncImage'
+import { PixelSprite, spriteForGame } from '../sprites/PixelSprite'
 import { JuegoForm } from '../forms/JuegoForm'
 
 export function JuegosTab({
@@ -60,7 +60,13 @@ export function JuegosTab({
               >
                 <div className="card-juego-top">
                   <div className="card-juego-left">
-                    <div className="celda-logo"><LogoThumb juego={j} size={8} /></div>
+                    <div className="celda-logo">
+                      {j.logo ? (
+                        <AsyncImage src={j.logo} alt="" className="logo-thumb" />
+                      ) : (
+                        <PixelSprite name={spriteForGame(j.id)} size={8} />
+                      )}
+                    </div>
                     <div className="jinfo">
                       <span className="jnombre">{j.nombre}</span>
                       <span className="jmeta">
@@ -82,31 +88,8 @@ export function JuegosTab({
                     )}
                   </div>
                   <div className="card-juego-thumbs">
-                    {j.caratula && <img className="caratula-thumb" src={j.caratula} alt="Carátula" />}
-                    {j.screenshot && (
-                      esMediaMp4(j.screenshot) ? (
-                        <video
-                          className="shot-thumb"
-                          src={j.screenshot}
-                          autoPlay
-                          muted
-                          playsInline
-                          onTimeUpdate={(e) => {
-                            const v = e.target
-                            if (v.duration && v.currentTime >= v.duration - 0.12) {
-                              v.currentTime = 0
-                            }
-                          }}
-                          onEnded={(e) => {
-                            const v = e.target
-                            v.currentTime = 0
-                            v.play().catch(() => {})
-                          }}
-                        />
-                      ) : (
-                        <img className="shot-thumb" src={j.screenshot} alt="Captura" />
-                      )
-                    )}
+                    {j.caratula && <AsyncImage src={j.caratula} alt="Carátula" className="caratula-thumb" />}
+                    {j.screenshot && <AsyncImage src={j.screenshot} alt="Captura" className="shot-thumb" />}
                   </div>
                 </div>
               </div>
