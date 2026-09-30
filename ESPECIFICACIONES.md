@@ -18,7 +18,9 @@ puntuación configurables por juego y las puntuaciones registradas.
 
 ## Ubicación del código y despliegue
 
-- **Carpeta de trabajo local**: `C:\Users\mfarr\Dropbox\php\retroal`
+- **Carpeta de trabajo local**: `C:\Users\mfarr\Dropbox\GITHUB\tornoes_retroal`
+  (antes `C:\Users\mfarr\Dropbox\php\retroal`, movido el 30/09/2026 y conectado
+  a GitHub — ver `.github/copilot-instructions.md` para más detalle)
 - **Destino en producción (NAS)**: `\\nas_farra\web\codefm\retroal`
   (equivale a `/volume1/web/codefm/retroal` visto desde el propio NAS por SSH)
 - **Base de datos en producción**: `\\nas_farra\web\codefm\retroal\data\tareas.db`
