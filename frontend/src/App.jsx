@@ -3,7 +3,7 @@ import ryuGif from './assets/ryu.gif'
 import kenGif from './assets/ken.gif'
 import headerLeft from './assets/header-left.png'
 import headerRight from './assets/header-right.png'
-import { API_AUTH, API_CLASIFICACION, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS } from './api/endpoints'
+import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS } from './api/endpoints'
 import { BannerPlaceholder } from './components/common/BannerPlaceholder'
 import { AsyncImage, esMediaMp4 } from './components/common/AsyncImage'
 import { DropZone } from './components/common/DropZone'
@@ -1032,6 +1032,29 @@ export default function App() {
     setTorneoScoreEditando(s)
   }
 
+  function copiarRetoATorneito(torneo, juego) {
+    setConfirmar({
+      titulo: 'COPIAR A TORNEÍTO RETROAL',
+      mensaje: `Se copiarán todas las puntuaciones de "${juego.nombre}" en ${torneo.nombre} a la clasificación general (Torneíto Retroal). Esta acción no se puede deshacer.`,
+      confirmLabel: 'COPIAR',
+      accion: async () => {
+        setGuardando(true)
+        setGuardandoTexto('COPIANDO PUNTUACIONES...')
+        try {
+          const { ok, data } = await apiCall(API_COPIAR_TORNEITO, 'POST', { torneo_id: torneo.id, juego_id: juego.id })
+          if (ok) {
+            await cargarJuegos()
+            avisarOk(`${data?.copiadas ?? ''} puntuación(es) copiada(s) a Torneíto Retroal ✔`)
+          } else {
+            avisarError(data?.error || 'Error al copiar las puntuaciones')
+          }
+        } finally {
+          setGuardando(false)
+        }
+      },
+    })
+  }
+
   // ---------- Puntuaciones ----------
   async function guardarScore(payload, idEditar) {
     setGuardando(true)
@@ -1263,6 +1286,7 @@ export default function App() {
             setFiltroTorneoUser={setFiltroTorneoUser}
             editarTorneoScore={editarTorneoScore}
             eliminarTorneoScore={eliminarTorneoScore}
+            copiarRetoATorneito={copiarRetoATorneito}
             torneosSuper={torneosSuper}
             torneoTodasScores={torneoTodasScores}
             avisarError={avisarError}
@@ -1492,7 +1516,7 @@ export default function App() {
                 className="modal-si"
                 onClick={() => { confirmar.accion(); setConfirmar(null) }}
               >
-                ELIMINAR
+                {confirmar.confirmLabel || 'ELIMINAR'}
               </button>
             </div>
           </div>

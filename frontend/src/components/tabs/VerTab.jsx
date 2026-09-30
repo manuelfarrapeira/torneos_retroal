@@ -44,6 +44,7 @@ export function VerTab({
   setFiltroTorneoUser,
   editarTorneoScore,
   eliminarTorneoScore,
+  copiarRetoATorneito,
   torneosSuper,
   torneoTodasScores,
   avisarError,
@@ -338,6 +339,22 @@ export function VerTab({
                       onEliminar={eliminarTorneoScore}
                       esAdmin={esAdmin}
                     />
+                    {esAdmin && (
+                      <button
+                        type="button"
+                        className="btn-normas btn-copiar-torneito"
+                        disabled={(torneoJuego.total_scores ?? 0) > 0}
+                        onClick={() => copiarRetoATorneito(selTorneo, torneoJuego)}
+                        data-tooltip={
+                          (torneoJuego.total_scores ?? 0) > 0
+                            ? 'Este juego ya tiene puntuaciones en Torneíto Retroal'
+                            : 'Copiar las puntuaciones de este reto a Torneíto Retroal'
+                        }
+                        data-tooltip-pos="right"
+                      >
+                        📋 COPIAR A TORNEÍTO
+                      </button>
+                    )}
                   </div>
                   {torneoJuego.screenshot && (
                     <div className="juego-imagen-derecha">
