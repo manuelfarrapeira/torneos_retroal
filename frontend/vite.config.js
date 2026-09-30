@@ -9,6 +9,7 @@ export default defineConfig({
     // En desarrollo, redirige /api al servidor PHP local (php -S localhost:8000).
     proxy: {
       '/api': 'http://localhost:8000',
+      '/uploads': 'http://localhost:8000',
     },
   },
 })
