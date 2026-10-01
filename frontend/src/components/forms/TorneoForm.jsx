@@ -9,7 +9,7 @@ import { fileToDataUrl } from '../../utils/file'
 // ---------- Formulario de torneo ----------
 // Mensual: título automático (mes+año), 0 o 1 juego (se puede añadir después).
 // Super: título libre, 0+ juegos (se pueden ir añadiendo con el tiempo).
-export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onConfirmar }) {
+export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onConfirmar, esAdmin }) {
   const editando = !!torneo && torneo !== 'nuevo'
   const hoy = new Date()
   const [tipo, setTipo] = useState(editando ? torneo.tipo : 'mensual')
@@ -26,6 +26,11 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
   const [logoPreview, setLogoPreview] = useState(editando && torneo.tipo === 'super' ? (torneo.logo || null) : null)
   const [logoBorrar, setLogoBorrar] = useState(false)
 
+  // Carátula de reto (solo para retos mensuales)
+  const [caratula, setCaratula] = useState(null)
+  const [caraturaBorrar, setCaraturaBorrar] = useState(false)
+  const [caraturaPreview, setCaraturaPreview] = useState(editando && torneo.tipo === 'mensual' ? (torneo.caratula_reto || null) : null)
+
   async function procesarLogoTorneoFile(f) {
     if (!f) return
     try {
@@ -36,6 +41,19 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
 
   async function onLogoTorneoChange(e) { procesarLogoTorneoFile(e.target.files[0]) }
   function quitarLogoTorneo() { setLogoData(null); setLogoPreview(null); setLogoBorrar(true) }
+
+  async function procesarCaraturasFile(f) {
+    if (!f) return
+    setCaratula(f)
+    try {
+      const url = await fileToDataUrl(f)
+      setCaraturaPreview(url)
+      setCaraturaBorrar(false)
+    } catch (err) { onError(err?.message || 'Error al leer la carátula') }
+  }
+
+  async function onCaraturaChange(e) { procesarCaraturasFile(e.target.files[0]) }
+  function quitarCaratura() { setCaratula(null); setCaraturaPreview(null); setCaraturaBorrar(true) }
 
   // Récords ya guardados por juego en este torneo: si tiene, no se puede quitar/cambiar.
   const scoresPorJuego = editando ? Object.fromEntries((torneo.juegos || []).map((j) => [j.id, j.total_scores || 0])) : {}
@@ -73,7 +91,10 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
   function submit(e) {
     e.preventDefault()
     if (tipo === 'mensual') {
-      onGuardar({ tipo, mes: Number(mes), anio: Number(anio), juegos: juegoUnico ? [juegoUnico.id] : [] }, editando ? torneo.id : null)
+      const payload = { tipo, mes: Number(mes), anio: Number(anio), juegos: juegoUnico ? [juegoUnico.id] : [] }
+      if (caratula) payload._caratula_file = caratula
+      if (caraturaBorrar) payload._caratula_borrar = true
+      onGuardar(payload, editando ? torneo.id : null)
     } else {
       if (!nombre.trim()) { onError('El nombre del supertorneo es obligatorio'); return }
       const payload = { tipo, nombre: nombre.trim(), juegos: juegosSel }
@@ -123,6 +144,24 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
                 <button type="button" className="borrar sm" onClick={quitarJuegoUnico}>✕ QUITAR JUEGO</button>
               )}
             </>
+          )}
+
+          {esAdmin && (
+            <div className="img-upload img-upload-reto">
+              <span className="img-upload-lbl">CARÁTULA (opcional)</span>
+              <DropZone accept="image/jpeg,image/png" onFileSelect={procesarCaraturasFile}>
+                <div className="img-preview">
+                  {caraturaPreview ? <img src={caraturaPreview} alt="Carátula del reto" /> : <span className="img-vacio">Sin carátula<br/><small style={{ fontSize: '9px', opacity: 0.7 }}>(Arrastra imagen JPG/PNG)</small></span>}
+                </div>
+              </DropZone>
+              <div className="img-upload-acciones">
+                <label className="btn-file">
+                  SUBIR
+                  <input type="file" accept="image/jpeg,image/png" onChange={onCaraturaChange} hidden />
+                </label>
+                {caraturaPreview && <button type="button" className="btn-secundario" onClick={quitarCaratura}>QUITAR</button>}
+              </div>
+            </div>
           )}
         </>
       ) : (

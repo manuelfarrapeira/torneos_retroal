@@ -82,9 +82,30 @@ function getDb(): PDO {
             logo           TEXT,
             imagen_campeon TEXT,
             normas         TEXT,
+            caratula_reto  TEXT,
             creado_en      TEXT    NOT NULL DEFAULT (datetime(\'now\'))
         );
     ');
+
+    // Auto-migraciones de columnas para bases de datos importadas/restauradas
+    $colsTorneos = $pdo->query("PRAGMA table_info(torneos)")->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('caratula_reto', $colsTorneos)) {
+        $pdo->exec('ALTER TABLE torneos ADD COLUMN caratula_reto TEXT;');
+    }
+    if (!in_array('imagen_campeon', $colsTorneos)) {
+        $pdo->exec('ALTER TABLE torneos ADD COLUMN imagen_campeon TEXT;');
+    }
+    if (!in_array('normas', $colsTorneos)) {
+        $pdo->exec('ALTER TABLE torneos ADD COLUMN normas TEXT;');
+    }
+    if (!in_array('logo', $colsTorneos)) {
+        $pdo->exec('ALTER TABLE torneos ADD COLUMN logo TEXT;');
+    }
+
+    $colsJuegos = $pdo->query("PRAGMA table_info(juegos)")->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('caratula', $colsJuegos)) {
+        $pdo->exec('ALTER TABLE juegos ADD COLUMN caratula TEXT;');
+    }
 
     // ---- Juegos incluidos en cada torneo (1 para mensual, N para supertorneos) ----
     $pdo->exec('

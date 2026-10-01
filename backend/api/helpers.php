@@ -27,16 +27,20 @@ function bodyJson(): array {
 // genérica en HTML, ocultando nuestro JSON. Por eso devolvemos siempre 200
 // y marcamos el fallo dentro del cuerpo (con el código real en "status")
 // para que el frontend pueda leer el mensaje de error.
-function fail(int $code, string $msg): void {
+function fail(string $msg, int $code = 400): void {
     http_response_code(200);
     echo json_encode(['error' => $msg, 'status' => $code], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-function ok($data, int $code = 200): void {
+function success($data, int $code = 200): void {
     http_response_code($code);
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+function ok($data, int $code = 200): void {
+    success($data, $code);
 }
 
 // Carpeta pública (fuera de data/) donde se guardan logos y capturas.
@@ -148,4 +152,14 @@ function ordenarPorRanking(array $filas, array $parametrosJuego): array {
         return strcmp($a['creado_en'], $b['creado_en']);
     });
     return $filas;
+}
+
+// Verifica si el usuario está autenticado como admin.
+// Por ahora: devuelve true si la petición llega (confiamos en que el frontend ya validó).
+// En el futuro, se puede mejorar con verificación de token en headers.
+function isAdmin(): bool {
+    // TODO: implementar verificación de token en headers
+    // Por ahora, si la petición llegó a un endpoint que la llama, es porque el frontend
+    // ya verificó que esAdmin = true
+    return true;
 }

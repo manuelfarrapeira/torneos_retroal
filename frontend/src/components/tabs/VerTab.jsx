@@ -356,9 +356,16 @@ export function VerTab({
                       </button>
                     )}
                   </div>
-                  {torneoJuego.screenshot && (
+                  {(torneoJuego.screenshot || selTorneo.caratula_reto) && (
                     <div className="juego-imagen-derecha">
-                      <AsyncImage src={torneoJuego.screenshot} alt="Captura" className="lateral-screenshot" />
+                      {torneoJuego.screenshot && (
+                        <AsyncImage src={torneoJuego.screenshot} alt="Captura" className="lateral-screenshot" />
+                      )}
+                      {selTorneo.caratula_reto && (
+                        <div className="reto-caratula-debajo-screenshot">
+                          <AsyncImage src={selTorneo.caratula_reto} alt="Carátula del reto" className="reto-caratula-grande" />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

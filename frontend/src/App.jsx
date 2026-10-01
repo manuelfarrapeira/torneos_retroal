@@ -3,7 +3,7 @@ import ryuGif from './assets/ryu.gif'
 import kenGif from './assets/ken.gif'
 import headerLeft from './assets/header-left.png'
 import headerRight from './assets/header-right.png'
-import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS } from './api/endpoints'
+import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS, API_SUBIR_CARATULA_RETO, API_ELIMINAR_CARATULA_RETO } from './api/endpoints'
 import { BannerPlaceholder } from './components/common/BannerPlaceholder'
 import { AsyncImage, esMediaMp4 } from './components/common/AsyncImage'
 import { DropZone } from './components/common/DropZone'
@@ -376,6 +376,35 @@ export default function App() {
             avisarOk('Imagen quitada del Panteón ✔')
           } else {
             avisarError(data?.error || 'Error al quitar la imagen')
+          }
+        } finally {
+          setGuardando(false)
+        }
+      },
+    })
+  }
+
+  function quitarCaratulaReto(torneoId) {
+    if (!esAdmin) return
+    const t = torneos.find((x) => x.id === torneoId)
+    setConfirmar({
+      titulo: 'ELIMINAR CARÁTULA',
+      mensaje: `¿Seguro que deseas eliminar la carátula del reto "${t?.nombre}"?`,
+      accion: async () => {
+        setGuardando(true)
+        setGuardandoTexto('ELIMINANDO CARÁTULA...')
+        try {
+          const formData = new FormData()
+          formData.append('torneo_id', torneoId)
+          const res = await fetch(API_ELIMINAR_CARATULA_RETO, { method: 'POST', body: formData })
+          const resText = await res.text()
+          let data
+          try { data = JSON.parse(resText) } catch (e) {}
+          if (data && data.error) {
+            avisarError(data.error)
+          } else {
+            await cargarTorneos()
+            avisarOk('Carátula eliminada ✔')
           }
         } finally {
           setGuardando(false)
@@ -943,17 +972,68 @@ export default function App() {
   // ---------- Torneos y Retos ----------
   async function guardarTorneo(payload, idEditar) {
     const esSuper = payload.tipo === 'super'
+    const isMensual = payload.tipo === 'mensual'
+    const caratula_file = payload._caratula_file
+    const caratula_borrar = payload._caratula_borrar
+    
+    // Eliminar los flags privados antes de enviar al API
+    delete payload._caratula_file
+    delete payload._caratula_borrar
+    
     setGuardando(true)
     setGuardandoTexto(idEditar ? (esSuper ? 'ACTUALIZANDO SUPERTORNEO...' : 'ACTUALIZANDO RETO...') : (esSuper ? 'CREANDO SUPERTORNEO...' : 'CREANDO RETO...'))
     try {
       const url = idEditar ? `${API_TORNEOS}?id=${idEditar}` : API_TORNEOS
       const { ok, data } = await apiCall(url, idEditar ? 'PUT' : 'POST', payload)
       if (ok) {
-        const lista = await cargarTorneos()
-        if (selTorneo) setSelTorneo(lista.find((t) => t.id === selTorneo.id) || null)
-        setFormTorneo(null)
-        setTorneoFormKey((k) => k + 1)
-        avisarOk(idEditar ? (esSuper ? 'Supertorneo actualizado ✔' : 'Reto actualizado ✔') : (esSuper ? 'Supertorneo creado ✔' : 'Reto creado ✔'))
+        const torneoId = idEditar || data.id
+        
+        // Manejar carátula si es reto mensual
+        let caratula_ok = true
+        if (isMensual && (caratula_file || caratula_borrar)) {
+          if (caratula_borrar) {
+            // Eliminar carátula
+            const formData = new FormData()
+            formData.append('torneo_id', torneoId)
+            setGuardandoTexto('Eliminando carátula...')
+            const res = await fetch(API_ELIMINAR_CARATULA_RETO, { method: 'POST', body: formData })
+            const resText = await res.text()
+            if (!res.ok) {
+              try {
+                const errData = JSON.parse(resText)
+                avisarError(errData?.error || 'Error al eliminar la carátula')
+              } catch (e) {
+                avisarError(`Error al eliminar la carátula: ${res.status} ${resText.substring(0, 100)}`)
+              }
+              caratula_ok = false
+            }
+          } else if (caratula_file) {
+            // Subir carátula
+            const formData = new FormData()
+            formData.append('torneo_id', torneoId)
+            formData.append('caratula', caratula_file)
+            setGuardandoTexto('Subiendo carátula...')
+            const res = await fetch(API_SUBIR_CARATULA_RETO, { method: 'POST', body: formData })
+            const resText = await res.text()
+            if (!res.ok) {
+              try {
+                const errData = JSON.parse(resText)
+                avisarError(errData?.error || 'Error al subir la carátula')
+              } catch (e) {
+                avisarError(`Error al subir la carátula: ${res.status} ${resText.substring(0, 100)}`)
+              }
+              caratula_ok = false
+            }
+          }
+        }
+        
+        if (caratula_ok) {
+          const lista = await cargarTorneos()
+          if (selTorneo) setSelTorneo(lista.find((t) => t.id === selTorneo.id) || null)
+          setFormTorneo(null)
+          setTorneoFormKey((k) => k + 1)
+          avisarOk(idEditar ? (esSuper ? 'Supertorneo actualizado ✔' : 'Reto actualizado ✔') : (esSuper ? 'Supertorneo creado ✔' : 'Reto creado ✔'))
+        }
       } else {
         avisarError(data?.error || 'Error al guardar')
       }
@@ -1402,6 +1482,7 @@ export default function App() {
             setVerSubTab={setVerSubTab}
             setTab={setTab}
             eliminarTorneo={eliminarTorneo}
+            quitarCaratulaReto={quitarCaratulaReto}
             torneosSuper={torneosSuper}
           />
         )}
@@ -1427,6 +1508,7 @@ export default function App() {
               onCancelar={() => setFormTorneo(null)}
               onError={avisarError}
               onConfirmar={setConfirmar}
+              esAdmin={esAdmin}
             />
           </div>
         </div>

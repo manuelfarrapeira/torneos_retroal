@@ -11,6 +11,7 @@ export function TorneosTab({
   setVerSubTab,
   setTab,
   eliminarTorneo,
+  quitarCaratulaReto,
   torneosSuper,
 }) {
   return (
@@ -29,11 +30,15 @@ export function TorneosTab({
         <button className={gestionSubTab === 'torneos' ? 'tab activa' : 'tab'} onClick={() => setGestionSubTab('torneos')}>
           <span className="tab-icon">🏅</span><span className="tab-label">RETOS</span>
         </button>
+        <button className={gestionSubTab === 'archivo' ? 'tab activa' : 'tab'} onClick={() => setGestionSubTab('archivo')}>
+          <span className="tab-icon">📸</span><span className="tab-label">ARCHIVO RETOS</span>
+        </button>
         <button className={gestionSubTab === 'supertorneos' ? 'tab activa' : 'tab'} onClick={() => setGestionSubTab('supertorneos')}>
           <span className="tab-icon">🎖️</span><span className="tab-label">SUPERTORNEOS</span>
         </button>
         <select className="subtabs-select" value={gestionSubTab} onChange={(e) => setGestionSubTab(e.target.value)}>
           <option value="torneos">🏅 RETOS</option>
+          <option value="archivo">📸 ARCHIVO RETOS</option>
           <option value="supertorneos">🎖️ SUPERTORNEOS</option>
         </select>
       </nav>
@@ -68,6 +73,62 @@ export function TorneosTab({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {gestionSubTab === 'archivo' && (
+        <div className="subtab-panel">
+          <p className="torneos-total">📸 ARCHIVO DE CARÁTULAS</p>
+          <div className="panteon-scroll-wrap">
+            <div className="panteon-grid">
+              {torneosMensuales.length === 0 && (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 20px' }}>
+                  <span className="vacio">No hay retos todavía</span>
+                </div>
+              )}
+              {torneosMensuales.filter((t) => t.caratula_reto).length === 0 && torneosMensuales.length > 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 20px' }}>
+                  <span className="vacio">Ningún reto tiene carátula aún</span>
+                </div>
+              ) : (
+                torneosMensuales
+                  .filter((t) => t.caratula_reto)
+                  .map((t) => (
+                    <div key={t.id} className="panteon-card">
+                      <div className="panteon-img-wrap">
+                        <img src={t.caratula_reto} alt={t.nombre} className="panteon-img" loading="lazy" decoding="async" />
+                      </div>
+                      <div className="panteon-info">
+                        <div className="panteon-header-row">
+                          <span className="panteon-nombre">{t.nombre}</span>
+                          {esAdmin && (
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                              <button
+                                className="borrar sm editar"
+                                onClick={() => setFormTorneo(t)}
+                                data-tooltip="Cambiar carátula / Editar reto"
+                                data-tooltip-pos="left"
+                              >
+                                ✎
+                              </button>
+                              <button
+                                className="borrar sm"
+                                onClick={() => quitarCaratulaReto(t.id)}
+                                data-tooltip="Eliminar carátula"
+                                data-tooltip-pos="left"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <span className="panteon-juego">{t.juegos[0]?.nombre || 'sin juego'}</span>
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
         </div>
       )}
 

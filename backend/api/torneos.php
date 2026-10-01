@@ -65,7 +65,7 @@ function campeonDelTorneo(PDO $db, int $torneoId): ?string {
 }
 
 function torneoRow(PDO $db, int $id): ?array {
-    $stmt = $db->prepare('SELECT id, tipo, nombre, mes, anio, logo, imagen_campeon, normas, creado_en FROM torneos WHERE id = :id');
+    $stmt = $db->prepare('SELECT id, tipo, nombre, mes, anio, logo, imagen_campeon, normas, caratula_reto, creado_en FROM torneos WHERE id = :id');
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch();
     if (!$row) return null;
@@ -76,7 +76,7 @@ function torneoRow(PDO $db, int $id): ?array {
 }
 
 function todosLosTorneos(PDO $db): array {
-    $filas = $db->query('SELECT id, tipo, nombre, mes, anio, logo, imagen_campeon, normas, creado_en FROM torneos ORDER BY anio DESC, mes DESC, nombre COLLATE NOCASE ASC')->fetchAll();
+    $filas = $db->query('SELECT id, tipo, nombre, mes, anio, logo, imagen_campeon, normas, caratula_reto, creado_en FROM torneos ORDER BY anio DESC, mes DESC, nombre COLLATE NOCASE ASC')->fetchAll();
     foreach ($filas as &$f) {
         $f['juegos'] = juegosDelTorneo($db, (int) $f['id']);
         $f['total_scores'] = array_sum(array_column($f['juegos'], 'total_scores'));
@@ -225,7 +225,12 @@ try {
             // ON DELETE CASCADE elimina también torneo_juegos y sus puntuaciones.
             $stmt = $db->prepare('DELETE FROM torneos WHERE id = :id');
             $stmt->execute([':id' => $id]);
-            if ($actual) borrarImagen($actual['logo']);
+            if ($actual) {
+                borrarImagen($actual['logo']);
+                if ($actual['caratula_reto']) {
+                    borrarImagen($actual['caratula_reto']);
+                }
+            }
             ok(['ok' => true, 'eliminado' => $id]);
             break;
 

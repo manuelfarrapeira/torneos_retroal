@@ -3,11 +3,12 @@
 # para que los ficheros de builds anteriores (con hash distinto) se borren
 # automáticamente en cada despliegue, en vez de acumularse.
 #
-# IMPORTANTE: el /MIR (que borra ficheros sobrantes) SOLO se aplica a la carpeta
-# "assets" (JS/CSS/imágenes propias del build). NUNCA debe tocar "uploads/"
-# (carátulas, capturas y logos subidos por los usuarios), "data/" (base de datos)
-# ni "api/" (backend PHP) del NAS. Si en el futuro se modifica este script,
-# no reutilizar /MIR fuera de la carpeta "assets".
+# ⚠️ CRÍTICO - PROTECCIONES CONTRA PÉRDIDA DE DATOS:
+# - /MIR (que borra ficheros sobrantes) SOLO se aplica a la carpeta "assets"
+# - NUNCA toca "uploads/" (imágenes subidas por usuarios)
+# - NUNCA toca "data/" (base de datos - IRREEMPLAZABLE)
+# - NUNCA toca "api/" (archivos PHP - se despliegan por separado)
+# - Validaciones de seguridad detienen cualquier intento de /PURGE fuera de assets/
 #
 # Uso: desde la raíz del proyecto -> powershell -File deploy.ps1
 
@@ -44,3 +45,6 @@ Write-Host "==> Copiando ficheros raíz (index.html, favicons)..." -ForegroundCo
 Get-ChildItem $distDir -File | Copy-Item -Destination $nasDest -Force
 
 Write-Host "==> Despliegue completado. uploads/, data/ y api/ no se han tocado." -ForegroundColor Green
+Write-Host ""
+Write-Host "✅ IMPORTANTE: uploads/ (imágenes de usuarios), data/ (BD) y api/ (PHP) ESTÁN PROTEGIDOS" -ForegroundColor Green
+
