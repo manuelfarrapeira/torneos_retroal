@@ -17,16 +17,12 @@ export function TorneosTab({
   return (
     <section className="screen">
       <h2 className="panel-title">▸ RETOS Y SUPERTORNEOS</h2>
-      <p className="form-ayuda">
-        Crea y edita aquí los retos y supertorneos. Para ver su clasificación y meter récords, ve a
-        la pestaña PUNTUACIONES → subpestaña RETOS.
-      </p>
 
       {esAdmin && (
         <button className="btn-nuevo" onClick={() => setFormTorneo('nuevo')}>+ NUEVO RETO / SUPERTORNEO</button>
       )}
 
-      <nav className="tabs subtabs">
+      <nav className="tabs subtabs subtabs-siempre-visible">
         <button className={gestionSubTab === 'torneos' ? 'tab activa' : 'tab'} onClick={() => setGestionSubTab('torneos')}>
           <span className="tab-icon">🏅</span><span className="tab-label">RETOS</span>
         </button>

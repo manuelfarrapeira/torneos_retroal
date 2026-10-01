@@ -1342,6 +1342,13 @@ export default function App() {
                 <option value="supertorneos">🎖️ SUPERTORNEOS</option>
               </select>
             )}
+            {tab === 'torneos' && (
+              <select className="subtabs-select" value={gestionSubTab} onChange={(e) => setGestionSubTab(e.target.value)}>
+                <option value="torneos">🏅 RETOS</option>
+                <option value="archivo">📸 ARCHIVO RETOS</option>
+                <option value="supertorneos">🎖️ SUPERTORNEOS</option>
+              </select>
+            )}
           </div>
         </nav>
 
