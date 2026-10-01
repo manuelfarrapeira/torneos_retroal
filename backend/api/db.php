@@ -55,19 +55,6 @@ function getDb(): PDO {
         );
     ');
 
-    // Asegurar columna caratula en instalaciones existentes
-    $colsJuegos = $pdo->query('PRAGMA table_info(juegos)')->fetchAll();
-    $hasCaratula = false;
-    foreach ($colsJuegos as $col) {
-        if ($col['name'] === 'caratula') {
-            $hasCaratula = true;
-            break;
-        }
-    }
-    if (!$hasCaratula) {
-        $pdo->exec('ALTER TABLE juegos ADD COLUMN caratula TEXT;');
-    }
-
     // ---- Parámetros asignados a cada juego (config. del sistema de puntuación del juego) ----
     $pdo->exec('
         CREATE TABLE IF NOT EXISTS juego_parametros (
@@ -85,54 +72,19 @@ function getDb(): PDO {
     ');
 
     // ---- Torneos (mensuales: mes+año+1 juego; supertorneos: nombre libre+varios juegos) ----
-    // Si la tabla existe con el esquema antiguo (sin columna "tipo"), se recrea desde
-    // cero: no había datos que conservar (confirmado con el usuario).
-    $tieneTipo = false;
-    foreach ($pdo->query("PRAGMA table_info(torneos)")->fetchAll() as $col) {
-        if ($col['name'] === 'tipo') { $tieneTipo = true; break; }
-    }
-    if (!$tieneTipo) {
-        $pdo->exec('DROP TABLE IF EXISTS torneo_juegos;');
-        $pdo->exec('DROP TABLE IF EXISTS torneos;');
-    }
     $pdo->exec('
         CREATE TABLE IF NOT EXISTS torneos (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            tipo       TEXT    NOT NULL CHECK (tipo IN (\'mensual\',\'super\')),
-            nombre     TEXT    NOT NULL,
-            mes        INTEGER CHECK (mes IS NULL OR mes BETWEEN 1 AND 12),
-            anio       INTEGER,
-            creado_en  TEXT    NOT NULL DEFAULT (datetime(\'now\'))
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            tipo           TEXT    NOT NULL CHECK (tipo IN (\'mensual\',\'super\')),
+            nombre         TEXT    NOT NULL,
+            mes            INTEGER CHECK (mes IS NULL OR mes BETWEEN 1 AND 12),
+            anio           INTEGER,
+            logo           TEXT,
+            imagen_campeon TEXT,
+            normas         TEXT,
+            creado_en      TEXT    NOT NULL DEFAULT (datetime(\'now\'))
         );
     ');
-
-    // Migración: columna "logo" para la imagen opcional de los supertorneos
-    // (si no se sube ninguna, el frontend usa un sprite pixel-art aleatorio).
-    $tieneLogo = false;
-    foreach ($pdo->query("PRAGMA table_info(torneos)")->fetchAll() as $col) {
-        if ($col['name'] === 'logo') { $tieneLogo = true; break; }
-    }
-    if (!$tieneLogo) {
-        $pdo->exec('ALTER TABLE torneos ADD COLUMN logo TEXT;');
-    }
-
-    // Migración: columna "imagen_campeon" para el Panteón de los Campeones
-    $tieneImagenCampeon = false;
-    foreach ($pdo->query("PRAGMA table_info(torneos)")->fetchAll() as $col) {
-        if ($col['name'] === 'imagen_campeon') { $tieneImagenCampeon = true; break; }
-    }
-    if (!$tieneImagenCampeon) {
-        $pdo->exec('ALTER TABLE torneos ADD COLUMN imagen_campeon TEXT;');
-    }
-
-    // Migración: columna "normas" para normas específicas de supertorneos
-    $tieneNormas = false;
-    foreach ($pdo->query("PRAGMA table_info(torneos)")->fetchAll() as $col) {
-        if ($col['name'] === 'normas') { $tieneNormas = true; break; }
-    }
-    if (!$tieneNormas) {
-        $pdo->exec('ALTER TABLE torneos ADD COLUMN normas TEXT;');
-    }
 
     // ---- Juegos incluidos en cada torneo (1 para mensual, N para supertorneos) ----
     $pdo->exec('
