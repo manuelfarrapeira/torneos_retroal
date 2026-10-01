@@ -71,7 +71,11 @@ export function ScoreForm({ juego, usuarios, score, onGuardar, onCancelar, onErr
       </div>
       <div className="acciones-form">
         <button type="submit">{editando ? 'GUARDAR CAMBIOS' : 'GUARDAR'}</button>
-        {editando && <button type="button" className="btn-secundario" onClick={onCancelar}>CANCELAR EDICIÓN</button>}
+        {onCancelar && (
+          <button type="button" className="btn-secundario" onClick={onCancelar}>
+            {editando ? 'CANCELAR EDICIÓN' : 'CANCELAR'}
+          </button>
+        )}
       </div>
     </form>
   )

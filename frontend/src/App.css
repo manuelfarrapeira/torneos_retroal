@@ -1435,7 +1435,7 @@ body {
   box-shadow: 0 4px 16px rgba(0, 92, 46, 0.1);
 }
 .modal.modal-form-torneo { width: 100%; max-width: 640px; max-height: 86vh; overflow-y: auto; text-align: left; }
-.modal.modal-form-score { width: 100%; max-width: 640px; max-height: 86vh; overflow-y: auto; text-align: left; }
+.modal.modal-form-score { width: 100%; max-width: 640px; max-height: none; overflow: visible; text-align: left; }
 .modal.modal-form-panteon { width: 100%; max-width: 540px; max-height: 86vh; overflow-y: auto; text-align: left; }
 .modal-juego-fijo {
   margin: -6px 0 16px;
@@ -2179,7 +2179,7 @@ body {
   padding: 20px 8px;
 }
 
-.acciones-form { display: flex; gap: 12px; margin-top: 16px; }
+.acciones-form { display: flex; gap: 12px; margin-top: 16px; align-items: center; }
 .acciones-form button[type="submit"] {
   font-family: var(--font-pixel);
   font-size: 12px;
@@ -2190,6 +2190,19 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,85,212,0.25);
   cursor: pointer;
+}
+.acciones-form .btn-secundario {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  padding: 12px 20px;
+  color: var(--sms-red);
+  background: transparent;
+  border: 2px solid var(--sms-red);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.acciones-form .btn-secundario:hover {
+  background: rgba(230,0,38,0.08);
 }
 
 /* ---------- Ficha de juego (pestaña Ver) ---------- */

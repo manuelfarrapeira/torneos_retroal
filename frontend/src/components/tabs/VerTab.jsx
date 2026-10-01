@@ -421,16 +421,6 @@ export function VerTab({
               <div className="supertorneo-layout">
                 <div className="supertorneo-col-general">
                   <SuperGeneralTable generalStandings={calcularClasificacionGeneralSuper(selTorneo, torneoTodasScores, juegos)} />
-                  {esAdmin && (
-                    <button
-                      type="button"
-                      className="btn-nuevo btn-record-bajo-clasif"
-                      style={{ marginTop: '14px', width: '100%' }}
-                      onClick={() => setModalNuevoRecordSuper(true)}
-                    >
-                      + AÑADIR RÉCORD
-                    </button>
-                  )}
                 </div>
 
                 <div className="supertorneo-col-juego">
@@ -474,6 +464,16 @@ export function VerTab({
                         onEliminar={eliminarTorneoScore}
                         esAdmin={esAdmin}
                       />
+                      {esAdmin && (
+                        <button
+                          type="button"
+                          className="btn-nuevo btn-record-bajo-clasif"
+                          style={{ marginTop: '14px' }}
+                          onClick={() => setModalNuevoRecordSuper(true)}
+                        >
+                          + AÑADIR RÉCORD
+                        </button>
+                      )}
                       {(torneoJuego.caratula || torneoJuego.screenshot) && (
                         <div className="juego-imagenes-debajo-movil">
                           {torneoJuego.caratula && (
