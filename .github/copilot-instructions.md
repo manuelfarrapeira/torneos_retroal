@@ -28,11 +28,7 @@ puntuación configurables, torneos mensuales, retos y supertorneos.
 - **Base de datos de producción**: `\\nas_farra\web\codefm\retroal\data\tareas.db`
   (SQLite). Esa misma base de datos la comparte otra app distinta
   ("Mis Tareas", tabla `tareas`) — no tocar esa tabla.
-- **Acceso al NAS por SSH**: MCP `ssh-nas` (host `192.168.18.10`, puerto `33`,
-  usuario `mfarrapeira`). El subsistema SFTP de este NAS NO funciona
-  (falla "Unable to start subsystem: sftp"); para copiar archivos usar SMB
-  (`Copy-Item`/`robocopy` contra `\\nas_farra\...`) y usar `ssh_exec` solo
-  para comandos (sqlite3, php -l, etc.).
+- **Acceso al NAS**: Debes de usar el MCP `ssh-nas`.
 
 ## Reglas duras (no negociables)
 
