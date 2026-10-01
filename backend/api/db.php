@@ -175,12 +175,11 @@ function getDb(): PDO {
         CREATE UNIQUE INDEX IF NOT EXISTS ux_puntuaciones_general
         ON puntuaciones(juego_id, usuario_id) WHERE torneo_id IS NULL;
     ');
-    // Se recrea siempre con la definición actual (incluye juego_id) porque en
-    // supertorneos un jugador puede tener una puntuación por cada juego del
-    // torneo, no solo una por torneo.
-    $pdo->exec('DROP INDEX IF EXISTS ux_puntuaciones_torneo;');
+    // Nota: en supertorneos un jugador puede tener una puntuación por cada
+    // juego del torneo, no solo una por torneo. Se usa IF NOT EXISTS para
+    // evitar race conditions cuando hay múltiples peticiones concurrentes.
     $pdo->exec('
-        CREATE UNIQUE INDEX ux_puntuaciones_torneo
+        CREATE UNIQUE INDEX IF NOT EXISTS ux_puntuaciones_torneo
         ON puntuaciones(torneo_id, juego_id, usuario_id) WHERE torneo_id IS NOT NULL;
     ');
 
