@@ -170,5 +170,17 @@ function getDb(): PDO {
         );
     ');
 
+    // ---- Arcades Retroal (galerías de arcades con imagen y enlace web) ----
+    $pdo->exec('
+        CREATE TABLE IF NOT EXISTS arcades (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre     TEXT    NOT NULL,
+            imagen     TEXT,
+            enlace     TEXT,
+            orden      INTEGER NOT NULL DEFAULT 0,
+            creado_en  TEXT    NOT NULL DEFAULT (datetime(\'now\'))
+        );
+    ');
+
     return $pdo;
 }

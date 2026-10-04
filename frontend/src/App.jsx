@@ -3,7 +3,7 @@ import ryuGif from './assets/ryu.gif'
 import kenGif from './assets/ken.gif'
 import headerLeft from './assets/header-left.png'
 import headerRight from './assets/header-right.png'
-import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS, API_SUBIR_CARATULA_RETO, API_ELIMINAR_CARATULA_RETO } from './api/endpoints'
+import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS, API_SUBIR_CARATULA_RETO, API_ELIMINAR_CARATULA_RETO, API_ARCADES } from './api/endpoints'
 import { BannerPlaceholder } from './components/common/BannerPlaceholder'
 import { AsyncImage, esMediaMp4 } from './components/common/AsyncImage'
 import { DropZone } from './components/common/DropZone'
@@ -20,6 +20,7 @@ import { JuegosTab } from './components/tabs/JuegosTab'
 import { ParametrosTab } from './components/tabs/ParametrosTab'
 import { TorneosTab } from './components/tabs/TorneosTab'
 import { UsuariosTab } from './components/tabs/UsuariosTab'
+import { FamiliaTab } from './components/tabs/FamiliaTab'
 import { VerTab } from './components/tabs/VerTab'
 import { PixelSprite, SPRITE_NAMES } from './components/sprites/PixelSprite'
 import { RankingTable } from './components/tables/RankingTable'
@@ -35,6 +36,7 @@ export default function App() {
   const [juegos, setJuegos] = useState([])
   const [marqueeJuegos, setMarqueeJuegos] = useState(null)
   const [usuarios, setUsuarios] = useState([])
+  const [arcades, setArcades] = useState([])
   const [parametros, setParametros] = useState([])
   const [sel, setSel] = useState(null) // juego seleccionado
   const [scores, setScores] = useState([])
@@ -42,6 +44,7 @@ export default function App() {
   const [errorPopup, setErrorPopup] = useState(null)
   const [ok, setOk] = useState(null)
   const [tab, setTab] = useState('ver') // 'ver' | 'meter' | 'juegos' | 'usuarios' | 'parametros'
+  const [usuariosSubTab, setUsuariosSubTab] = useState('jugadores') // subtab dentro de 'usuarios': 'jugadores' | 'arcades'
 
   const [activeTooltip, setActiveTooltip] = useState(null)
 
@@ -160,6 +163,9 @@ export default function App() {
 
   const [formJuego, setFormJuego] = useState(null) // null | 'nuevo' | juego
   const [formUsuario, setFormUsuario] = useState(null)
+  const [formArcade, setFormArcade] = useState(null)
+  const formArcadeRef = useRef(null)
+  const [arcadeImagePreview, setArcadeImagePreview] = useState(null)
   const [formParametro, setFormParametro] = useState(null)
   const [scoreEditando, setScoreEditando] = useState(null)
   // Se incrementan tras cada guardado con éxito; al usarse como "key" del
@@ -560,6 +566,14 @@ export default function App() {
     return []
   }
 
+  async function cargarArcades() {
+    const res = await fetch(API_ARCADES)
+    if (res.ok) {
+      const data = await res.json()
+      if (Array.isArray(data)) setArcades(data)
+    }
+  }
+
   async function cargarTorneoScores(torneoId, juegoId) {
     if (!torneoId || !juegoId) {
       setTorneoScores([])
@@ -736,7 +750,7 @@ export default function App() {
     }
   }, [normasEditando, normasTipo, normasGeneralHtml, normasRetosHtml, normasSupertorneoHtml])
 
-  useEffect(() => { cargarJuegos(); cargarUsuarios(); cargarParametros(); cargarTorneos(); cargarNormas() }, [])
+  useEffect(() => { cargarJuegos(); cargarUsuarios(); cargarParametros(); cargarTorneos(); cargarNormas(); cargarArcades() }, [])
 
   // Precarga asíncrona en paralelo/segundo plano (requestIdleCallback) de las imágenes
   // de campeón del Panteón y logos de torneos tras renderizar la vista inicial.
@@ -911,6 +925,44 @@ export default function App() {
             if (sel) cargarScores(sel.id)
             if (selTorneo) cargarTorneoScores(selTorneo.id)
             avisarOk('Jugador eliminado ✔')
+          }
+        } finally {
+          setGuardando(false)
+        }
+      },
+    })
+  }
+
+  async function guardarArcade(payload) {
+    setGuardando(true)
+    setGuardandoTexto(payload.id ? 'ACTUALIZANDO ARCADE...' : 'CREANDO ARCADE...')
+    try {
+      const url = payload.id ? `${API_ARCADES}?id=${payload.id}` : API_ARCADES
+      const { ok, data } = await apiCall(url, payload.id ? 'PUT' : 'POST', payload)
+      if (ok) {
+        await cargarArcades()
+        setFormArcade(null)
+        avisarOk(payload.id ? 'Arcade actualizado ✔' : 'Arcade creado ✔')
+      } else {
+        avisarError(data?.error || 'Error al guardar el arcade')
+      }
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  function eliminarArcade(arcadeId) {
+    setConfirmar({
+      titulo: 'ELIMINAR ARCADE',
+      mensaje: 'Se borrará este arcade de la galería.',
+      accion: async () => {
+        setGuardando(true)
+        setGuardandoTexto('ELIMINANDO ARCADE...')
+        try {
+          const { ok } = await apiCall(`${API_ARCADES}?id=${arcadeId}`, 'DELETE')
+          if (ok) {
+            await cargarArcades()
+            avisarOk('Arcade eliminado ✔')
           }
         } finally {
           setGuardando(false)
@@ -1310,7 +1362,7 @@ export default function App() {
             <span className="tab-icon">🎮</span><span className="tab-label">JUEGOS</span> <span className="tab-badge">{juegos.length}</span>
           </button>
           <button className={tab === 'usuarios' ? 'tab activa' : 'tab'} onClick={() => setTab('usuarios')}>
-            <span className="tab-icon">👤</span><span className="tab-label">JUGADORES</span> <span className="tab-badge">{usuarios.length}</span>
+            <span className="tab-icon">👪</span><span className="tab-label">LA FAMILIA RETROAL</span>
           </button>
           {esAdmin && (
             <button className={tab === 'parametros' ? 'tab activa' : 'tab'} onClick={() => setTab('parametros')}>
@@ -1323,7 +1375,7 @@ export default function App() {
               {esAdmin && <option value="meter">✏️ NUEVO RÉCORD</option>}
               <option value="torneos">🏅 RETOS Y TORNEOS ({torneosMensuales.length + torneosSuper.length})</option>
               <option value="juegos">🎮 JUEGOS ({juegos.length})</option>
-              <option value="usuarios">👤 JUGADORES ({usuarios.length})</option>
+              <option value="usuarios">👪 LA FAMILIA RETROAL</option>
               {esAdmin && <option value="parametros">🧩 PARÁMETROS ({parametros.length})</option>}
             </select>
             {tab === 'ver' && (
@@ -1347,6 +1399,12 @@ export default function App() {
                 <option value="torneos">🏅 RETOS</option>
                 <option value="archivo">📸 ARCHIVO RETOS</option>
                 <option value="supertorneos">🎖️ SUPERTORNEOS</option>
+              </select>
+            )}
+            {tab === 'usuarios' && (
+              <select className="subtabs-select" value={usuariosSubTab} onChange={(e) => setUsuariosSubTab(e.target.value)}>
+                <option value="jugadores">👤 JUGADORES ({usuarios.length})</option>
+                <option value="arcades">🏪 ARCADES RETROAL ({arcades.length})</option>
               </select>
             )}
           </div>
@@ -1445,10 +1503,12 @@ export default function App() {
           />
         )}
 
-        {/* ---------- PESTAÑA: JUGADORES ---------- */}
+        {/* ---------- PESTAÑA: LA FAMILIA RETROAL (JUGADORES + ARCADES) ---------- */}
         {tab === 'usuarios' && (
-          <UsuariosTab
+          <FamiliaTab
             esAdmin={esAdmin}
+            usuariosSubTab={usuariosSubTab}
+            setUsuariosSubTab={setUsuariosSubTab}
             formUsuario={formUsuario}
             usuarioFormKey={usuarioFormKey}
             guardarUsuario={guardarUsuario}
@@ -1459,6 +1519,11 @@ export default function App() {
             setFiltroJugador={setFiltroJugador}
             abrirDetalleJugador={abrirDetalleJugador}
             eliminarUsuario={eliminarUsuario}
+            arcades={arcades}
+            guardarArcade={guardarArcade}
+            eliminarArcade={eliminarArcade}
+            formArcade={formArcade}
+            setFormArcade={setFormArcade}
           />
         )}
 
@@ -1839,6 +1904,93 @@ export default function App() {
             <div className="modal-acciones">
               <button className="modal-no" onClick={() => setJugadorDetalle(null)}>CERRAR</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {formArcade && esAdmin && (
+        <div className="modal-overlay" onClick={() => { setFormArcade(null); setArcadeImagePreview(null) }}>
+          <div className="modal modal-form-arcade" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-titulo">{formArcade === 'nuevo' ? '+ NUEVO ARCADE' : '✎ EDITAR ARCADE'}</h3>
+            <form ref={formArcadeRef} className="arcade-form-modal" onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.target)
+              const imagen = formData.get('imagen')
+              const enlace = formData.get('enlace')?.trim()
+
+              if (!imagen && formArcade !== 'nuevo' && !formArcade?.imagen) {
+                avisarError('Se requiere una imagen')
+                return
+              }
+
+              if (formArcade === 'nuevo' && !imagen) {
+                avisarError('Se requiere una imagen')
+                return
+              }
+
+              if (!enlace) {
+                avisarError('El enlace web es requerido')
+                return
+              }
+
+              await guardarArcade({
+                ...(formArcade !== 'nuevo' && { id: formArcade.id }),
+                imagen: imagen || (formArcade !== 'nuevo' ? formArcade.imagen : null),
+                enlace: enlace,
+              })
+              setFormArcade(null)
+              setArcadeImagePreview(null)
+            }}>
+              <div className="campo">
+                <label>Enlace Web</label>
+                <input
+                  type="url"
+                  name="enlace"
+                  defaultValue={formArcade !== 'nuevo' ? formArcade.enlace : ''}
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+
+              <div className="campo">
+                <span>IMAGEN (FORMATO VERTICAL)</span>
+                <DropZone
+                  accept="image/*"
+                  onFileSelect={async (file) => {
+                    if (file) {
+                      try {
+                        const url = await fileToDataUrl(file)
+                        if (formArcadeRef.current) {
+                          const input = formArcadeRef.current.querySelector('input[name="imagen"]')
+                          if (input) input.value = url
+                        }
+                        setArcadeImagePreview(url)
+                      } catch (err) {
+                        avisarError(err?.message || 'Error al leer la imagen')
+                      }
+                    }
+                  }}
+                >
+                  {arcadeImagePreview ? (
+                    <img src={arcadeImagePreview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} />
+                  ) : (
+                    <div className="arcade-dropzone-inner">
+                      📥 Arrastra aquí la imagen o haz clic para subir
+                    </div>
+                  )}
+                </DropZone>
+                <input type="hidden" name="imagen" />
+              </div>
+
+              <div className="modal-acciones" style={{ marginTop: '20px' }}>
+                <button type="button" className="modal-no" onClick={() => { setFormArcade(null); setArcadeImagePreview(null) }}>
+                  CANCELAR
+                </button>
+                <button type="submit" className="modal-si">
+                  {formArcade === 'nuevo' ? '+ CREAR' : '✎ GUARDAR'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

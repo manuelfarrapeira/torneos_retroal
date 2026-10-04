@@ -34,6 +34,8 @@ export function DropZone({ onFileSelect, accept = 'image/*', children, className
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={() => inputRef.current?.click()}
+      style={{ cursor: 'pointer' }}
     >
       <input
         ref={inputRef}
