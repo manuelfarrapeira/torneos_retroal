@@ -28,14 +28,14 @@ export function FamiliaTab({
 
       <nav className="tabs subtabs">
         <button className={usuariosSubTab === 'jugadores' ? 'tab activa' : 'tab'} onClick={() => setUsuariosSubTab('jugadores')}>
-          <span className="tab-icon">🕹️</span><span className="tab-label">JUGADORES</span>
+          <span className="tab-icon">🕹️</span><span className="tab-label">JUGADORES</span> <span className="tab-badge">{usuarios.length}</span>
         </button>
         <button className={usuariosSubTab === 'arcades' ? 'tab activa' : 'tab'} onClick={() => setUsuariosSubTab('arcades')}>
-          <span className="tab-icon">🏪</span><span className="tab-label">ARCADES RETROAL</span>
+          <span className="tab-icon">🏪</span><span className="tab-label">ARCADES RETROAL</span> <span className="tab-badge">{arcades.length}</span>
         </button>
         <select className="subtabs-select" value={usuariosSubTab} onChange={(e) => setUsuariosSubTab(e.target.value)}>
-          <option value="jugadores">🕹️ JUGADORES</option>
-          <option value="arcades">🏪 ARCADES RETROAL</option>
+          <option value="jugadores">🕹️ JUGADORES ({usuarios.length})</option>
+          <option value="arcades">🏪 ARCADES RETROAL ({arcades.length})</option>
         </select>
       </nav>
 
@@ -94,6 +94,7 @@ export function FamiliaTab({
           <ArcadesTab
             esAdmin={esAdmin}
             arcades={arcades}
+            usuarios={usuarios}
             guardarArcade={guardarArcade}
             eliminarArcade={eliminarArcade}
             avisarError={avisarError}

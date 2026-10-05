@@ -16,6 +16,7 @@ import { ParametroForm } from './components/forms/ParametroForm'
 import { ScoreForm } from './components/forms/ScoreForm'
 import { TorneoForm } from './components/forms/TorneoForm'
 import { UsuarioForm } from './components/forms/UsuarioForm'
+import { SelectorUsuario } from './components/common/SelectorUsuario'
 import { JuegosTab } from './components/tabs/JuegosTab'
 import { ParametrosTab } from './components/tabs/ParametrosTab'
 import { TorneosTab } from './components/tabs/TorneosTab'
@@ -166,6 +167,11 @@ export default function App() {
   const [formArcade, setFormArcade] = useState(null)
   const formArcadeRef = useRef(null)
   const [arcadeImagePreview, setArcadeImagePreview] = useState(null)
+  const [arcadeUsuarioIds, setArcadeUsuarioIds] = useState([null, null])
+  const [arcadeJugadorImg, setArcadeJugadorImg] = useState(null)
+  useEffect(() => {
+    setArcadeUsuarioIds(formArcade && formArcade !== 'nuevo' ? [formArcade.usuario_id || null, formArcade.usuario_id2 || null] : [null, null])
+  }, [formArcade])
   const [formParametro, setFormParametro] = useState(null)
   const [scoreEditando, setScoreEditando] = useState(null)
   // Se incrementan tras cada guardado con éxito; al usarse como "key" del
@@ -1274,6 +1280,12 @@ export default function App() {
     }
   }
 
+  const arcadeJugador = (() => {
+    if (!jugadorDetalle) return null
+    const uid = usuarios.find((u) => u.nombre === jugadorDetalle)?.id
+    return uid ? arcades.find((a) => a.usuario_id === uid || a.usuario_id2 === uid) || null : null
+  })()
+
   return (
     <div className="arcade">
       <div className="scanlines" aria-hidden="true"></div>
@@ -1727,14 +1739,41 @@ export default function App() {
               >
                 🎖️ SUPERTORNEOS
               </button>
+              {arcadeJugador && (
+                <button
+                  className={jugadorDetalleTab === 'arcade' ? 'tab activa' : 'tab'}
+                  onClick={() => setJugadorDetalleTab('arcade')}
+                >
+                  🏪 ARCADE
+                </button>
+              )}
               <select className="subtabs-select" value={jugadorDetalleTab} onChange={(e) => setJugadorDetalleTab(e.target.value)}>
                 <option value="clasificacion">🏆 CLASIFICACIÓN</option>
                 <option value="torneos">🏅 RETOS</option>
                 <option value="supertorneos">🎖️ SUPERTORNEOS</option>
+                {arcadeJugador && <option value="arcade">🏪 ARCADE</option>}
               </select>
             </nav>
 
             <div className="subtab-panel modal-subtab-panel">
+              {jugadorDetalleTab === 'arcade' && arcadeJugador && (
+                <div className="arcade-card jugador-arcade-card">
+                  <div className="arcade-img-wrap" style={{ cursor: arcadeJugador.imagen ? 'pointer' : 'default' }} onClick={() => arcadeJugador.imagen && setArcadeJugadorImg(arcadeJugador.imagen)}>
+                    {arcadeJugador.imagen ? (
+                      <img src={arcadeJugador.imagen} alt="Arcade" className="arcade-img" />
+                    ) : (
+                      <div className="arcade-img-placeholder">Sin imagen</div>
+                    )}
+                  </div>
+                  <div className="arcade-info">
+                    {arcadeJugador.enlace && (
+                      <a href={arcadeJugador.enlace} target="_blank" rel="noopener noreferrer" className="arcade-btn-ver-video" title="Ver video / Ir a la web">
+                        📹 VER VIDEO
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
               {jugadorDetalleTab === 'clasificacion' && (
                 <>
                   {(clasificacion?.detallePorJugador?.get(jugadorDetalle) || []).length > 0 && (
@@ -1900,6 +1939,15 @@ export default function App() {
         </div>
       )}
 
+      {arcadeJugadorImg && (
+        <div className="modal-overlay" onClick={() => setArcadeJugadorImg(null)}>
+          <div className="arcade-modal-imagen" onClick={(e) => e.stopPropagation()}>
+            <button className="arcade-modal-cerrar" onClick={() => setArcadeJugadorImg(null)} title="Cerrar">✕</button>
+            <img src={arcadeJugadorImg} alt="Vista completa" className="arcade-imagen-completa" />
+          </div>
+        </div>
+      )}
+
       {formArcade && esAdmin && (
         <div className="modal-overlay" onClick={() => { setFormArcade(null); setArcadeImagePreview(null) }}>
           <div className="modal modal-form-arcade" onClick={(e) => e.stopPropagation()}>
@@ -1929,6 +1977,7 @@ export default function App() {
                 ...(formArcade !== 'nuevo' && { id: formArcade.id }),
                 imagen: imagen || (formArcade !== 'nuevo' ? formArcade.imagen : null),
                 enlace: enlace,
+                usuario_ids: arcadeUsuarioIds.filter(Boolean),
               })
               setFormArcade(null)
               setArcadeImagePreview(null)
@@ -1942,6 +1991,29 @@ export default function App() {
                   placeholder="https://example.com"
                   required
                 />
+              </div>
+
+              <div className="campo">
+                <span>JUGADORES (OPCIONAL, MÁX. 2)</span>
+                {arcadeUsuarioIds.filter(Boolean).length < 2 && (
+                  <SelectorUsuario
+                    usuarios={usuarios.filter((u) => {
+                      if (arcadeUsuarioIds.includes(u.id)) return false
+                      const ocupado = arcades.find((a) => a.usuario_id === u.id || a.usuario_id2 === u.id)
+                      return !ocupado || (formArcade !== 'nuevo' && ocupado.id === formArcade.id)
+                    })}
+                    sel={null}
+                    onSel={(id) => setArcadeUsuarioIds((prev) => [...prev.filter(Boolean), id])}
+                  />
+                )}
+                {arcadeUsuarioIds.filter(Boolean).map((id) => (
+                  <div className="arcade-jugador-chip" key={id}>
+                    <span>🕹 {usuarios.find((u) => u.id === id)?.nombre}</span>
+                    <button type="button" className="borrar" onClick={() => setArcadeUsuarioIds((prev) => prev.filter((x) => x && x !== id))}>
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
 
               <div className="campo">

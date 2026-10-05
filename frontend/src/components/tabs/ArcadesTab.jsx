@@ -7,6 +7,7 @@ const FILAS_VISIBLES = 2
 export function ArcadesTab({
   esAdmin,
   arcades,
+  usuarios = [],
   guardarArcade,
   eliminarArcade,
   avisarError,
@@ -89,6 +90,12 @@ export function ArcadesTab({
             </div>
 
             <div className="arcade-info">
+              {(() => {
+                const nombres = [arcade.usuario_id, arcade.usuario_id2]
+                  .map((uid) => uid && usuarios.find((u) => u.id === uid)?.nombre)
+                  .filter(Boolean)
+                return nombres.length > 0 && <div className="arcade-jugador">🕹 {nombres.join(' · ')}</div>
+              })()}
               {arcade.enlace && (
                 <a
                   href={arcade.enlace}

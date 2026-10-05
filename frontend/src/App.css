@@ -3561,3 +3561,7 @@ video.shot-thumb {
   .arcade-nome { font-size: 10px; }
   .arcade-url { font-size: 9px; }
 }
+
+.jugador-arcade-card { width: 240px; max-width: 100%; margin: 0 auto; flex-direction: column; }
+.arcade-jugador { text-align: center; font-family: var(--font-pixel); font-size: 12px; padding: 6px 4px; word-break: break-word; }
+.arcade-jugador-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }

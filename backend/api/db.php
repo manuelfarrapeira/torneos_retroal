@@ -181,6 +181,12 @@ function getDb(): PDO {
             creado_en  TEXT    NOT NULL DEFAULT (datetime(\'now\'))
         );
     ');
-
+    $colsArcades = $pdo->query("PRAGMA table_info(arcades)")->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('usuario_id', $colsArcades)) {
+        $pdo->exec('ALTER TABLE arcades ADD COLUMN usuario_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL;');
+    }
+    if (!in_array('usuario_id2', $colsArcades)) {
+        $pdo->exec('ALTER TABLE arcades ADD COLUMN usuario_id2 INTEGER REFERENCES usuarios(id) ON DELETE SET NULL;');
+    }
     return $pdo;
 }

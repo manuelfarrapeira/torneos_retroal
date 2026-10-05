@@ -43,6 +43,32 @@ function borrarImagenArcade(?string $rutaRelativa): void {
     }
 }
 
+// Asigna hasta 2 jugadores a un arcade (lista vacía = liberar). Un jugador solo
+// puede estar en un arcade.
+function asignarJugadoresArcade(PDO $db, int $arcadeId, $usuarioIds): void {
+    if (!is_array($usuarioIds)) {
+        $usuarioIds = $usuarioIds ? [$usuarioIds] : [];
+    }
+    $ids = array_values(array_unique(array_filter(array_map('intval', $usuarioIds))));
+    if (count($ids) > 2) {
+        fail(400, 'Un arcade admite como máximo 2 jugadores');
+    }
+    foreach ($ids as $uid) {
+        $stmt = $db->prepare('SELECT id FROM usuarios WHERE id = :id');
+        $stmt->execute([':id' => $uid]);
+        if (!$stmt->fetch()) {
+            fail(400, 'El jugador no existe');
+        }
+        $stmt = $db->prepare('SELECT id FROM arcades WHERE (usuario_id = :u OR usuario_id2 = :u) AND id <> :a');
+        $stmt->execute([':u' => $uid, ':a' => $arcadeId]);
+        if ($stmt->fetch()) {
+            fail(400, 'Un jugador ya tiene otro arcade asignado');
+        }
+    }
+    $stmt = $db->prepare('UPDATE arcades SET usuario_id = :u1, usuario_id2 = :u2 WHERE id = :a');
+    $stmt->execute([':u1' => $ids[0] ?? null, ':u2' => $ids[1] ?? null, ':a' => $arcadeId]);
+}
+
 try {
     $db = getDb();
     $method = $_SERVER['REQUEST_METHOD'];
@@ -50,7 +76,7 @@ try {
     if ($method === 'GET') {
         // Más recientes primero (los nuevos arcades reciben orden = max + 1)
         $stmt = $db->prepare('
-            SELECT id, nombre, imagen, enlace, orden, creado_en
+            SELECT id, nombre, imagen, enlace, orden, creado_en, usuario_id, usuario_id2
             FROM arcades
             ORDER BY orden DESC, id DESC
         ');
@@ -100,7 +126,12 @@ try {
             ':orden' => $maxOrden + 1
         ]);
 
-        ok(['id' => $db->lastInsertId()]);
+        $newArcadeId = (int)$db->lastInsertId();
+        if (array_key_exists('usuario_ids', $in)) {
+            asignarJugadoresArcade($db, $newArcadeId, $in['usuario_ids']);
+        }
+
+        ok(['id' => $newArcadeId]);
 
     } elseif ($method === 'PUT') {
         // Actualizar un arcade - SOLO ADMIN
@@ -152,6 +183,10 @@ try {
             ':imagen' => $imagenPath,
             ':enlace' => $enlace
         ]);
+
+        if (array_key_exists('usuario_ids', $in)) {
+            asignarJugadoresArcade($db, $id, $in['usuario_ids']);
+        }
 
         ok(['ok' => true]);
 
