@@ -1,6 +1,6 @@
 import { UsuarioForm } from '../forms/UsuarioForm'
 import { normalizarTexto } from '../../utils/text'
-import { PixelSprite } from '../sprites/PixelSprite'
+import { ArcadesTab } from './ArcadesTab'
 
 export function FamiliaTab({
   esAdmin,
@@ -91,70 +91,15 @@ export function FamiliaTab({
 
       {usuariosSubTab === 'arcades' && (
         <div className="subtab-panel">
-          {esAdmin && (
-            <form className="form form-compact" onSubmit={(e) => {
-              e.preventDefault()
-              if (!formArcade?.nombre?.trim()) {
-                avisarError('El nombre del arcade es obligatorio')
-                return
-              }
-              guardarArcade(formArcade)
-            }}>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Nombre del arcade"
-                value={formArcade?.nombre || ''}
-                onChange={(e) => setFormArcade({ ...formArcade, nombre: e.target.value })}
-              />
-              <input
-                type="url"
-                className="form-input"
-                placeholder="URL (abrir en nueva pestaña)"
-                value={formArcade?.url || ''}
-                onChange={(e) => setFormArcade({ ...formArcade, url: e.target.value })}
-              />
-              <input
-                type="file"
-                className="form-input"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) {
-                    const reader = new FileReader()
-                    reader.onload = (evt) => {
-                      setFormArcade({ ...formArcade, logo_data: evt.target.result })
-                    }
-                    reader.readAsDataURL(file)
-                  }
-                }}
-              />
-              <button type="submit" className="btn">{formArcade?.id ? 'EDITAR' : 'CREAR'} ARCADE</button>
-              {formArcade?.id && <button type="button" className="btn btn-cancel" onClick={() => setFormArcade(null)}>CANCELAR</button>}
-            </form>
-          )}
-
-          <div className="arcades-grid">
-            {arcades.length === 0 && (
-              <div className="placeholder">
-                <PixelSprite name="moneda" size={7} />
-                <p>NO HAY ARCADES\nREGISTRADOS</p>
-              </div>
-            )}
-            {arcades.map((a) => (
-              <div key={a.id} className="arcade-card">
-                {a.logo && <img src={a.logo} alt={a.nombre} className="arcade-logo" />}
-                <h3>{a.nombre}</h3>
-                {a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="arcade-link">Visitar →</a>}
-                {esAdmin && (
-                  <div className="arcade-actions">
-                    <button className="btn btn-small" onClick={() => setFormArcade(a)}>✎ Editar</button>
-                    <button className="btn btn-small btn-danger" onClick={() => eliminarArcade(a)}>✕ Eliminar</button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <ArcadesTab
+            esAdmin={esAdmin}
+            arcades={arcades}
+            guardarArcade={guardarArcade}
+            eliminarArcade={eliminarArcade}
+            avisarError={avisarError}
+            formArcade={formArcade}
+            setFormArcade={setFormArcade}
+          />
         </div>
       )}
     </section>
