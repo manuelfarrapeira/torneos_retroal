@@ -340,22 +340,30 @@ export function VerTab({
                       onEliminar={eliminarTorneoScore}
                       esAdmin={esAdmin}
                     />
-                    {esAdmin && (
-                      <button
-                        type="button"
-                        className="btn-normas btn-copiar-torneito"
-                        disabled={(torneoJuego.total_scores ?? 0) > 0}
-                        onClick={() => copiarRetoATorneito(selTorneo, torneoJuego)}
-                        data-tooltip={
-                          (torneoJuego.total_scores ?? 0) > 0
-                            ? 'Este juego ya tiene puntuaciones en Torneíto Retroal'
-                            : 'Copiar las puntuaciones de este reto a Torneíto Retroal'
-                        }
-                        data-tooltip-pos="right"
-                      >
-                        📋 COPIAR A TORNEÍTO
-                      </button>
-                    )}
+                    {esAdmin && (() => {
+                      const hoy = new Date()
+                      const mesEnCurso = selTorneo.anio != null && selTorneo.mes != null
+                        && (selTorneo.anio * 12 + selTorneo.mes) >= (hoy.getFullYear() * 12 + hoy.getMonth() + 1)
+                      const yaTiene = (torneoJuego.total_scores ?? 0) > 0
+                      return (
+                        <button
+                          type="button"
+                          className="btn-normas btn-copiar-torneito"
+                          disabled={yaTiene || mesEnCurso}
+                          onClick={() => copiarRetoATorneito(selTorneo, torneoJuego)}
+                          data-tooltip={
+                            mesEnCurso
+                              ? 'No se puede copiar hasta que termine el mes del reto'
+                              : yaTiene
+                                ? 'Este juego ya tiene puntuaciones en Torneíto Retroal'
+                                : 'Copiar las puntuaciones de este reto a Torneíto Retroal'
+                          }
+                          data-tooltip-pos="right"
+                        >
+                          📋 COPIAR A TORNEÍTO
+                        </button>
+                      )
+                    })()}
                   </div>
                   {(torneoJuego.screenshot || selTorneo.caratula_reto) && (
                     <div className="juego-columna-derecha">

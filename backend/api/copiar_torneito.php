@@ -18,9 +18,18 @@ try {
     if (!$torneoId) fail(400, 'Falta torneo_id');
     if (!$juegoId) fail(400, 'Falta juego_id');
 
-    $t = $db->prepare('SELECT 1 FROM torneos WHERE id = :t');
+    $t = $db->prepare('SELECT mes, anio FROM torneos WHERE id = :t');
     $t->execute([':t' => $torneoId]);
-    if (!$t->fetchColumn()) fail(404, 'El torneo no existe');
+    $torneo = $t->fetch();
+    if (!$torneo) fail(404, 'El torneo no existe');
+
+    // Un reto mensual solo se puede copiar cuando ya ha terminado su mes.
+    if ($torneo['mes'] && $torneo['anio']) {
+        $ahora = new DateTime('now', new DateTimeZone('Europe/Madrid'));
+        if (((int)$torneo['anio'] * 12 + (int)$torneo['mes']) >= ((int)$ahora->format('Y') * 12 + (int)$ahora->format('n'))) {
+            fail(400, 'No se puede copiar hasta que termine el mes del reto');
+        }
+    }
 
     $pertenece = $db->prepare('SELECT 1 FROM torneo_juegos WHERE torneo_id = :t AND juego_id = :j');
     $pertenece->execute([':t' => $torneoId, ':j' => $juegoId]);
