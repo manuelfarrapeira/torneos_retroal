@@ -1247,39 +1247,30 @@ export default function App() {
   const torneoJuego = selTorneoJuegoId ? juegos.find((j) => j.id === selTorneoJuegoId) : null
 
   function abrirDetalleJuego(j) {
-    // Contar puntuaciones en general y en supertorneos
-    const puntosGeneral = j.total_scores ?? 0
-    const puntosSuper = (j.total_scores_all ?? 0) - (j.total_scores ?? 0)
+    // Prioridad: torneito (general) > reto mensual > supertorneo.
+    // Si el juego no tiene récords en ninguno, no se navega a ningún sitio.
+    const conRecords = (t) => t.juegos?.some((g) => g.id === j.id && (g.total_scores || 0) > 0)
 
-    // Lógica: si tiene en ambos, va al general (torneíto);
-    // si solo tiene en super, va al supertorneo;
-    // si solo tiene en general, va al general.
-    // Si no tiene en ninguno, va al general por defecto.
-
-    if (puntosGeneral > 0) {
-      // Tiene en general (con o sin supertorneo) → va al general/torneíto
+    if ((j.total_scores ?? 0) > 0) {
       setSel(j)
       setTab('ver')
       setVerSubTab('general')
-    } else if (puntosSuper > 0) {
-      // Solo tiene en supertorneo → busca supertorneo que contenga el juego
-      const superTorneo = (torneos || []).find((t) => t.tipo === 'super' && t.juegos?.some((g) => g.id === j.id))
-      if (superTorneo) {
-        setSelTorneo(superTorneo)
-        setSelTorneoJuegoId(j.id)
-        setTab('ver')
-        setVerSubTab('supertorneos')
-      } else {
-        // Fallback: si no hay supertorneo con este juego, aun así va al general
-        setSel(j)
-        setTab('ver')
-        setVerSubTab('general')
-      }
-    } else {
-      // Sin puntos: por defecto va a general
-      setSel(j)
+      return
+    }
+    const reto = torneos.find((t) => t.tipo === 'mensual' && conRecords(t))
+    if (reto) {
+      setSelTorneo(reto)
+      setSelTorneoJuegoId(j.id)
       setTab('ver')
-      setVerSubTab('general')
+      setVerSubTab('torneos')
+      return
+    }
+    const superTorneo = torneos.find((t) => t.tipo === 'super' && conRecords(t))
+    if (superTorneo) {
+      setSelTorneo(superTorneo)
+      setSelTorneoJuegoId(j.id)
+      setTab('ver')
+      setVerSubTab('supertorneos')
     }
   }
 
@@ -1423,6 +1414,7 @@ export default function App() {
             setFiltroClasifJuego={setFiltroClasifJuego}
             dragScroll={dragScroll}
             setSel={setSel}
+            handleClickJuego={abrirDetalleJuego}
             juegos={juegos}
             sel={sel}
             abrirNormas={abrirNormas}

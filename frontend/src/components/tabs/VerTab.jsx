@@ -20,6 +20,7 @@ export function VerTab({
   setFiltroClasifJuego,
   dragScroll,
   setSel,
+  handleClickJuego,
   juegos,
   sel,
   abrirNormas,
@@ -168,7 +169,7 @@ export function VerTab({
                         .filter(({ juego }) => normalizarTexto(juego.nombre).includes(normalizarTexto(filtroClasifJuego)))
                         .map(({ juego, posiciones }) => (
                           <tr key={juego.id}>
-                            <td className="recreativa-juego-cell fila-juego-clic" onClick={() => { setSel(juego); setVerSubTab('general') }}>
+                            <td className="recreativa-juego-cell fila-juego-clic" onClick={() => { handleClickJuego(juego) }}>
                               <LogoThumb juego={juego} size={5} />
                               <span className="recreativa-nombre-text">{formatearNombreJuegoClasificacion(juego.nombre)}</span>
                             </td>
