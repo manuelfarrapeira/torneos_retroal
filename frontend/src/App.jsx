@@ -1968,11 +1968,6 @@ export default function App() {
                 return
               }
 
-              if (!enlace) {
-                avisarError('El enlace web es requerido')
-                return
-              }
-
               await guardarArcade({
                 ...(formArcade !== 'nuevo' && { id: formArcade.id }),
                 imagen: imagen || (formArcade !== 'nuevo' ? formArcade.imagen : null),
@@ -1983,13 +1978,12 @@ export default function App() {
               setArcadeImagePreview(null)
             }}>
               <div className="campo">
-                <label>Enlace Web</label>
+                <label>Enlace Web (opcional)</label>
                 <input
                   type="url"
                   name="enlace"
                   defaultValue={formArcade !== 'nuevo' ? formArcade.enlace : ''}
                   placeholder="https://example.com"
-                  required
                 />
               </div>
 

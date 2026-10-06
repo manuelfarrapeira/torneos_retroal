@@ -92,13 +92,10 @@ try {
         $in = bodyJson();
         $imagen = $in['imagen'] ?? null;
         $enlace = trim($in['enlace'] ?? '');
+        $enlace = $enlace === '' ? null : $enlace;
         
         if (!$imagen) {
             fail(400, 'La imagen es requerida');
-        }
-
-        if (!$enlace) {
-            fail(400, 'El enlace web es requerido');
         }
 
         // Guardar imagen en directorio
@@ -143,13 +140,10 @@ try {
         $id = (int)($in['id'] ?? 0);
         $imagen = $in['imagen'] ?? null;
         $enlace = trim($in['enlace'] ?? '');
+        $enlace = $enlace === '' ? null : $enlace;
 
         if (!$id) {
             fail(400, 'ID es requerido');
-        }
-
-        if (!$enlace) {
-            fail(400, 'El enlace web es requerido');
         }
 
         // Obtener arcade actual
