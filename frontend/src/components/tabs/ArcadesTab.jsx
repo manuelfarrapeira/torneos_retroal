@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { AsyncImage } from '../common/AsyncImage'
 import { DropZone } from '../common/DropZone'
 import { fileToDataUrl } from '../../utils/file'
 
@@ -84,7 +85,7 @@ export function ArcadesTab({
           >
             <div className="arcade-img-wrap" style={{ cursor: arcade.imagen ? 'pointer' : 'default' }} onClick={() => arcade.imagen && setImagenEnModal(arcade.imagen)}>
               {arcade.imagen && (
-                <img src={arcade.imagen} alt="Arcade" className="arcade-img" />
+                <AsyncImage src={arcade.imagen} alt="Arcade" className="arcade-img" style={{ height: '100%' }} />
               )}
               {!arcade.imagen && <div className="arcade-img-placeholder">Sin imagen</div>}
             </div>

@@ -205,6 +205,7 @@ export default function App() {
   const [filtroClasifJugador, setFiltroClasifJugador] = useState('')
   const [filtroClasifJuego, setFiltroClasifJuego] = useState('')
   const [jugadorDetalle, setJugadorDetalle] = useState(null)
+  const [jugadorDetalleClasificacionCargando, setJugadorDetalleClasificacionCargando] = useState(false)
   const [filtroJugadorDetalleJuego, setFiltroJugadorDetalleJuego] = useState('')
   const [jugadorDetalleTab, setJugadorDetalleTab] = useState('clasificacion') // 'clasificacion' | 'torneos' | 'supertorneos'
   const [torneosJugador, setTorneosJugador] = useState(null)
@@ -214,6 +215,7 @@ export default function App() {
   const [filtroJugadorDetalleSuper, setFiltroJugadorDetalleSuper] = useState('')
   const [anchoDetalleJugador, setAnchoDetalleJugador] = useState(0)
   const refDetalleJugador = useRef(null)
+  const refJugadorDetalleYaCargado = useRef(null)
 
   // ---- Panteón de los Campeones ----
   const [panteonTorneoId, setPanteonTorneoId] = useState('')
@@ -451,6 +453,8 @@ export default function App() {
 
   function abrirDetalleJugador(nombre) {
     setJugadorDetalle(nombre)
+    refJugadorDetalleYaCargado.current = null  // Reset para cargar nuevas puntuaciones
+    setJugadorDetalleClasificacionCargando(true)
     setFiltroJugadorDetalleJuego('')
     setFiltroJugadorDetalleTorneo('')
     setFiltroJugadorDetalleSuper('')
@@ -461,6 +465,79 @@ export default function App() {
     const usuario = usuarios.find((u) => u.nombre === nombre)
     if (usuario) cargarTorneosJugador(usuario.id)
   }
+
+  // Cargar puntuaciones adicionales del jugador que no estén en TOP 10
+  useEffect(() => {
+    if (!jugadorDetalle) return
+    if (!clasificacion || !juegos.length) {
+      setJugadorDetalleClasificacionCargando(false)
+      return
+    }
+
+    // Si ya cargamos para este jugador, no volver a cargar
+    if (refJugadorDetalleYaCargado.current === jugadorDetalle) {
+      setJugadorDetalleClasificacionCargando(false)
+      return
+    }
+
+    const cargarPuntuacionesAdicionales = async () => {
+      setJugadorDetalleClasificacionCargando(true)
+      try {
+        const detalleActualizado = new Map(clasificacion.detallePorJugador)
+        const juegoYaCargados = new Set(
+          (detalleActualizado.get(jugadorDetalle) || []).map((d) => d.juego.id)
+        )
+
+        let hayNuevos = false
+
+        for (const juego of juegos) {
+          if (juegoYaCargados.has(juego.id)) continue
+
+          try {
+            const res = await fetch(`${API_SCORES}?juego_id=${juego.id}`)
+            if (!res.ok) continue
+            const puntuaciones = await res.json()
+            if (!Array.isArray(puntuaciones)) continue
+
+            const puntuacionesJugador = puntuaciones.filter((p) => p.usuario === jugadorDetalle)
+            if (puntuacionesJugador.length === 0) continue
+
+            hayNuevos = true
+            if (!detalleActualizado.has(jugadorDetalle)) {
+              detalleActualizado.set(jugadorDetalle, [])
+            }
+
+            puntuacionesJugador.forEach((p) => {
+              const pos = puntuaciones.findIndex((pp) => pp.id === p.id) + 1
+              const detalleExistente = detalleActualizado.get(jugadorDetalle)
+              const yaEsta = detalleExistente.some((d) => d.juego.id === juego.id)
+
+              if (!yaEsta) {
+                detalleExistente.push({
+                  juego,
+                  pos,
+                  fecha: p.fecha,
+                  valores: p.valores || [],
+                })
+                detalleExistente.sort((a, b) => normalizarTexto(a.juego.nombre).localeCompare(normalizarTexto(b.juego.nombre)))
+              }
+            })
+          } catch {
+            // Ignorar errores
+          }
+        }
+
+        if (hayNuevos) {
+          setClasificacion((prev) => (prev ? { ...prev, detallePorJugador: detalleActualizado } : null))
+        }
+        refJugadorDetalleYaCargado.current = jugadorDetalle
+      } finally {
+        setJugadorDetalleClasificacionCargando(false)
+      }
+    }
+
+    cargarPuntuacionesAdicionales()
+  }, [jugadorDetalle, juegos.length, clasificacion])
 
   // Mide el ancho del contenido tras cada render del popup y se queda con el mayor
   // visto hasta ahora (con un tope), para que el modal no se encoja al cambiar de
@@ -1776,7 +1853,7 @@ export default function App() {
               )}
               {jugadorDetalleTab === 'clasificacion' && (
                 <>
-                  {(clasificacion?.detallePorJugador?.get(jugadorDetalle) || []).length > 0 && (
+                  {(clasificacion?.detallePorJugador?.get(jugadorDetalle) || []).length > 0 && !jugadorDetalleClasificacionCargando && (
                     <input
                       className="buscador"
                       value={filtroJugadorDetalleJuego}
@@ -1785,8 +1862,12 @@ export default function App() {
                     />
                   )}
                   <div className="detalle-jugador-scroll">
-                    {(clasificacion?.detallePorJugador?.get(jugadorDetalle) || []).length === 0 ? (
-                      <p className="modal-msg">Sin puntuaciones en el TOP 10 de ningún juego.</p>
+                    {jugadorDetalleClasificacionCargando ? (
+                      <div className="loading-spinner-wrap">
+                        <span className="loading-spinner" />
+                      </div>
+                    ) : (clasificacion?.detallePorJugador?.get(jugadorDetalle) || []).length === 0 ? (
+                      <p className="modal-msg">Sin puntuaciones en clasificación.</p>
                     ) : (
                       <table className="tabla-detalle-jugador">
                         <thead>
