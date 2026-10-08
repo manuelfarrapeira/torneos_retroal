@@ -3,7 +3,7 @@ import ryuGif from './assets/ryu.gif'
 import kenGif from './assets/ken.gif'
 import headerLeft from './assets/header-left.png'
 import headerRight from './assets/header-right.png'
-import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS, API_SUBIR_CARATULA_RETO, API_ELIMINAR_CARATULA_RETO, API_ARCADES } from './api/endpoints'
+import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS, API_SUBIR_CARATULA_RETO, API_ELIMINAR_CARATULA_RETO, API_ARCADES, API_PUNTUACIONES_RECIENTES } from './api/endpoints'
 import { BannerPlaceholder } from './components/common/BannerPlaceholder'
 import { AsyncImage, esMediaMp4 } from './components/common/AsyncImage'
 import { DropZone } from './components/common/DropZone'
@@ -36,6 +36,8 @@ import { normalizarTexto } from './utils/text'
 export default function App() {
   const [juegos, setJuegos] = useState([])
   const [marqueeJuegos, setMarqueeJuegos] = useState(null)
+  const [recientes, setRecientes] = useState([])
+
   const [usuarios, setUsuarios] = useState([])
   const [arcades, setArcades] = useState([])
   const [parametros, setParametros] = useState([])
@@ -48,6 +50,17 @@ export default function App() {
   const [usuariosSubTab, setUsuariosSubTab] = useState('jugadores') // subtab dentro de 'usuarios': 'jugadores' | 'arcades'
 
   const [activeTooltip, setActiveTooltip] = useState(null)
+
+  // Últimas puntuaciones para la marquesina vertical; se refrescan al cambiar de pestaña y cada minuto.
+  useEffect(() => {
+    const cargar = () => fetch(API_PUNTUACIONES_RECIENTES)
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d)) setRecientes(d) })
+      .catch(() => {})
+    cargar()
+    const t = setInterval(cargar, 60000)
+    return () => clearInterval(t)
+  }, [tab])
 
   useEffect(() => {
     const handleShow = (e) => {
@@ -1329,6 +1342,23 @@ export default function App() {
   // Juego completo (con parámetros) asociado al torneo seleccionado.
   const torneoJuego = selTorneoJuegoId ? juegos.find((j) => j.id === selTorneoJuegoId) : null
 
+  function abrirDesdeMarquesina(r) {
+    if (!r.torneo_id) {
+      const j = juegos.find((x) => x.id === r.juego_id)
+      if (!j) return
+      setSel(j)
+      setTab('ver')
+      setVerSubTab('general')
+      return
+    }
+    const t = torneos.find((x) => x.id === r.torneo_id)
+    if (!t) return
+    setSelTorneo(t)
+    setSelTorneoJuegoId(r.juego_id)
+    setTab('ver')
+    setVerSubTab(t.tipo === 'super' ? 'supertorneos' : 'torneos')
+  }
+
   function abrirDetalleJuego(j) {
     // Prioridad: torneito (general) > reto mensual > supertorneo.
     // Si el juego no tiene récords en ninguno, no se navega a ningún sitio.
@@ -1419,7 +1449,32 @@ export default function App() {
                 <span className="logo-space"> </span>
                 <span className="logo-line">RETROAL</span>
               </h1>
-              <div className="coin blink">INSERT COIN - PRESS START</div>
+              {recientes.length > 0 && (
+                <div className="vmarquee" aria-label="Últimas puntuaciones">
+                  <div className="vmarquee-item vmarquee-head">
+                    <span>JUEGO</span>
+                    <span>JUGADOR</span>
+                    <span>RÉCORD</span>
+                    <span>POSICIÓN</span>
+                  </div>
+                  <div className="vmarquee-body">
+                    <div
+                      className="vmarquee-track"
+                      style={{ animationDuration: `${recientes.length * 3}s` }}
+                    >
+                      {[...recientes, ...recientes].map((r, i) => (
+                        <div key={i} className="vmarquee-item">
+                          <button type="button" className="vmarquee-juego" onClick={() => abrirDesdeMarquesina(r)}>{r.juego}</button>
+                          <span className="vmarquee-user">{r.usuario}</span>
+                          <span className="vmarquee-valor">{r.valor}</span>
+                          <span className="vmarquee-pos">{r.posicion ?? '-'}/{r.total}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className={`coin blink coin-fallback${recientes.length > 0 ? ' hay-marquesina' : ''}`}>INSERT COIN - PRESS START</div>
             </div>
             <img src={headerRight} alt="Derecha" className="header-title-img header-title-right" />
           </div>

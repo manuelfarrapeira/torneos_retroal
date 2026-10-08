@@ -214,6 +214,57 @@ body {
   text-shadow: none;
 }
 .marquee-item .logo-thumb { max-width: 120px; width: auto; }
+/* Marquesina vertical de últimas puntuaciones: 3 filas visibles */
+.vmarquee {
+  --vm-row: 40px;
+  margin: 24px auto 0;
+  width: min(100%, 720px);
+  overflow: hidden;
+  border: 2px solid var(--sms-blue);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(2px);
+  box-shadow: 0 4px 12px rgba(0,85,212,0.15);
+}
+.vmarquee-body { height: calc(var(--vm-row) * 3); overflow: hidden; }
+.vmarquee-head {
+  height: 28px;
+  background: rgba(0,85,212,0.08);
+  color: var(--sms-blue);
+  font-weight: bold;
+  font-size: 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0,85,212,0.3);
+}
+.vmarquee-track { animation: scroll-up linear infinite; will-change: transform; }
+.vmarquee-body:hover .vmarquee-track { animation-play-state: paused; }
+.vmarquee-item {
+  height: var(--vm-row);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 38% 24% 24% 1fr;
+  align-items: center;
+  gap: 0 10px;
+  padding: 0 12px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  border-bottom: 1px dashed rgba(0,85,212,0.25);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.vmarquee-juego { color: var(--sms-blue); font-weight: bold; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: left; white-space: nowrap; }
+button.vmarquee-juego { background: none; border: 0; padding: 0; font: inherit; font-weight: bold; cursor: pointer; text-decoration: none; outline: none; }
+button.vmarquee-juego:hover { color: var(--sms-blue); text-decoration: none; }
+.vmarquee-user { overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: left; }
+.vmarquee-pos { color: var(--sms-red); font-weight: bold; text-align: left; }
+.vmarquee-valor { font-weight: bold; text-align: left; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+@keyframes scroll-up { from { transform: translateY(0);} to { transform: translateY(-50%);} }
+.coin-fallback.hay-marquesina { display: none; }
+@media (max-width: 768px) {
+  .vmarquee { display: none; }
+  .coin-fallback.hay-marquesina { display: block; }
+}
+
 @keyframes scroll-left { from { transform: translateX(0);} to { transform: translateX(-50%);} }
 
 /* ---------- Cabecera ---------- */
