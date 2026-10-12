@@ -1012,6 +1012,7 @@ button.vmarquee-juego:hover { color: var(--sms-blue); text-decoration: none; }
 .jmeta { font-family: var(--font-pixel); font-size: 8px; color: #006633; font-weight: bold; margin-top: 4px; }
 .jmeta-records { color: #995900; margin-top: 2px; }
 .jmeta-torneo { font-size: 11px; }
+.jmeta-ultimo { color: #9a9a9a; margin-top: 8px; }
 .jmeta-juego { color: #995900; font-weight: bold; margin-top: 2px; }
 .torneos-total {
   font-family: var(--font-pixel);

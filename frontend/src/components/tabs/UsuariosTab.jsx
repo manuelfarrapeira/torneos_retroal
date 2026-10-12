@@ -1,5 +1,6 @@
 import { UsuarioForm } from '../forms/UsuarioForm'
 import { normalizarTexto } from '../../utils/text'
+import { fechaLarga } from '../../utils/date'
 
 export function UsuariosTab({
   esAdmin,
@@ -49,7 +50,7 @@ export function UsuariosTab({
               <div className="jinfo jinfo-jugador-clic" onClick={() => abrirDetalleJugador(u.nombre)}>
                 <span className="jnombre">{u.nombre}</span>
                 <span className="jmeta">{u.total_scores} récords registrados</span>
-              </div>
+                                <span className="jmeta jmeta-ultimo">{u.ultimo_record ? `${u.ultimo_record_juego ?? ''} · ${fechaLarga(u.ultimo_record)}` : '—'}</span>              </div>
               {esAdmin && (
                 <>
                   <button className="borrar editar" onClick={() => setFormUsuario(u)} data-tooltip="Editar jugador" data-tooltip-pos="left">✎</button>

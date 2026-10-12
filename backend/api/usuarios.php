@@ -12,7 +12,10 @@ try {
         case 'GET':
             $sql = '
                 SELECT u.id, u.nombre, u.creado_en,
-                       COUNT(p.id) AS total_scores
+                       COUNT(p.id) AS total_scores,
+                       MAX(p.fecha) AS ultimo_record,
+                       (SELECT j.nombre FROM puntuaciones p2 JOIN juegos j ON j.id = p2.juego_id
+                        WHERE p2.usuario_id = u.id ORDER BY p2.fecha DESC, p2.id DESC LIMIT 1) AS ultimo_record_juego
                 FROM usuarios u
                 LEFT JOIN puntuaciones p ON p.usuario_id = u.id
                 GROUP BY u.id
@@ -66,7 +69,8 @@ try {
                 throw $e;
             }
             $row = $db->query("
-                SELECT u.id, u.nombre, u.creado_en, COUNT(p.id) AS total_scores
+                SELECT u.id, u.nombre, u.creado_en,
+                       COUNT(p.id) AS total_scores, MAX(p.fecha) AS ultimo_record
                 FROM usuarios u LEFT JOIN puntuaciones p ON p.usuario_id = u.id
                 WHERE u.id = $id GROUP BY u.id
             ")->fetch();
