@@ -6,6 +6,7 @@ import headerRight from './assets/header-right.png'
 import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMAS, API_PARAMETROS, API_SCORES, API_TORNEOS, API_TORNEOS_JUGADOR, API_USUARIOS, API_SUBIR_CARATULA_RETO, API_ELIMINAR_CARATULA_RETO, API_ARCADES, API_PUNTUACIONES_RECIENTES } from './api/endpoints'
 import { BannerPlaceholder } from './components/common/BannerPlaceholder'
 import { AsyncImage, esMediaMp4 } from './components/common/AsyncImage'
+import { Halloween } from './components/common/Halloween'
 import { DropZone } from './components/common/DropZone'
 import { LogoThumb } from './components/common/LogoThumb'
 import { SelectorJuego } from './components/common/SelectorJuego'
@@ -28,7 +29,7 @@ import { RankingTable } from './components/tables/RankingTable'
 import { SuperGeneralTable, calcularClasificacionGeneralSuper } from './components/tables/SuperGeneralTable'
 import { useDragScroll } from './hooks/useDragScroll'
 import { JUEGOS_DEMO, TIPO_LABEL } from './utils/constants'
-import { fechaLarga } from './utils/date'
+import { fechaLarga, esTemporadaHalloween } from './utils/date'
 import { fileToDataUrl } from './utils/file'
 import { formatearNombreJuegoClasificacion, formatearValorParam } from './utils/format'
 import { normalizarTexto } from './utils/text'
@@ -1398,6 +1399,7 @@ export default function App() {
       <div className="scanlines" aria-hidden="true"></div>
 
       <div className="cabinet">
+        {esTemporadaHalloween() && <Halloween />}
         {/* Marquesina: muestra los juegos creados (o clásicos de ejemplo si aún no hay ninguno) */}
         <div className="marquee-top">
           <div className="marquee-track">
