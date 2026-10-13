@@ -9,7 +9,7 @@ try {
     $limite = isset($_GET['limit']) ? max(1, min(30, (int) $_GET['limit'])) : 10;
 
     $recientes = $db->query("
-        SELECT p.id, p.juego_id, p.torneo_id, p.creado_en, u.nombre AS usuario, j.nombre AS juego,
+        SELECT p.id, p.juego_id, p.torneo_id, p.fecha, p.creado_en, u.nombre AS usuario, j.nombre AS juego,
                t.nombre AS torneo, t.tipo AS torneo_tipo
         FROM puntuaciones p
         JOIN usuarios u ON u.id = p.usuario_id
@@ -67,6 +67,7 @@ try {
             'usuario' => $r['usuario'],
             'parametro' => $primero['nombre'] ?? '',
             'valor' => $valor,
+            'fecha' => $r['fecha'],
             'posicion' => $c['posiciones'][(int) $r['id']] ?? null,
             'total' => count($c['posiciones']),
             'torneo' => $r['torneo'],

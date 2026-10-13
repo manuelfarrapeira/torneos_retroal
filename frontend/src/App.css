@@ -242,7 +242,7 @@ body {
   height: var(--vm-row);
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 38% 24% 24% 1fr;
+  grid-template-columns: 28% 19% 17% 15% 1fr;
   align-items: center;
   gap: 0 10px;
   padding: 0 12px;
@@ -256,6 +256,7 @@ body {
 button.vmarquee-juego { background: none; border: 0; padding: 0; font: inherit; font-weight: bold; cursor: pointer; text-decoration: none; outline: none; }
 button.vmarquee-juego:hover { color: var(--sms-blue); text-decoration: none; }
 .vmarquee-user { overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: left; }
+.vmarquee-fecha { text-align: left; white-space: nowrap; }
 .vmarquee-pos { color: var(--sms-red); font-weight: bold; text-align: left; }
 .vmarquee-valor { font-weight: bold; text-align: left; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 @keyframes scroll-up { from { transform: translateY(0);} to { transform: translateY(-50%);} }

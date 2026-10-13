@@ -1455,6 +1455,7 @@ export default function App() {
                     <span>JUEGO</span>
                     <span>JUGADOR</span>
                     <span>RÉCORD</span>
+                    <span>FECHA</span>
                     <span>POSICIÓN</span>
                   </div>
                   <div className="vmarquee-body">
@@ -1467,6 +1468,7 @@ export default function App() {
                           <button type="button" className="vmarquee-juego" onClick={() => abrirDesdeMarquesina(r)}>{r.juego}</button>
                           <span className="vmarquee-user">{r.usuario}</span>
                           <span className="vmarquee-valor">{r.valor}</span>
+                          <span className="vmarquee-fecha">{(r.fecha || '').slice(0, 10).split('-').reverse().join('/')}</span>
                           <span className="vmarquee-pos">{r.posicion ?? '-'}/{r.total}</span>
                         </div>
                       ))}
