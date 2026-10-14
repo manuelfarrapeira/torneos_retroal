@@ -15,7 +15,19 @@ function parametrosDeJuego(PDO $db, int $juegoId): array {
         ORDER BY jp.orden ASC, jp.id ASC
     ');
     $stmt->execute([':j' => $juegoId]);
-    return $stmt->fetchAll();
+    $filas = $stmt->fetchAll();
+    $stmtValores = $db->prepare("
+        SELECT COUNT(*) FROM puntuacion_valores pv
+        JOIN puntuaciones p ON p.id = pv.puntuacion_id
+        WHERE p.juego_id = :j AND pv.parametro_id = :p
+          AND ((pv.valor_texto IS NOT NULL AND TRIM(pv.valor_texto) <> '') OR pv.valor_num IS NOT NULL)
+    ");
+    foreach ($filas as &$f) {
+        $stmtValores->execute([':j' => $juegoId, ':p' => $f['parametro_id']]);
+        $f['con_valores'] = (int) $stmtValores->fetchColumn() > 0;
+    }
+    unset($f);
+    return $filas;
 }
 
 function juegoRow(PDO $db, int $id): ?array {
@@ -49,9 +61,24 @@ function guardarParametrosJuego(PDO $db, int $juegoId, array $parametros): void 
 
         $nuevosIds = array_map(fn($p) => (int)($p['parametro_id'] ?? 0), $parametros);
 
+        // Solo se bloquea si el parámetro tiene algún valor no vacío en este juego.
+        $stmtConValor = $db->prepare("
+            SELECT COUNT(*) FROM puntuacion_valores pv
+            JOIN puntuaciones p ON p.id = pv.puntuacion_id
+            WHERE p.juego_id = :j AND pv.parametro_id = :p
+              AND ((pv.valor_texto IS NOT NULL AND TRIM(pv.valor_texto) <> '') OR pv.valor_num IS NOT NULL)
+        ");
+        $stmtLimpiar = $db->prepare('
+            DELETE FROM puntuacion_valores WHERE parametro_id = :p
+              AND puntuacion_id IN (SELECT id FROM puntuaciones WHERE juego_id = :j)
+        ');
         foreach ($existentesIds as $existenteId) {
             if (!in_array((int)$existenteId, $nuevosIds, true)) {
-                fail(409, 'No se pueden eliminar parámetros de un juego que ya tiene récords guardados');
+                $stmtConValor->execute([':j' => $juegoId, ':p' => (int)$existenteId]);
+                if ((int) $stmtConValor->fetchColumn() > 0) {
+                    fail(409, 'No se pueden eliminar parámetros que ya tienen valores guardados en este juego');
+                }
+                $stmtLimpiar->execute([':j' => $juegoId, ':p' => (int)$existenteId]);
             }
         }
     }

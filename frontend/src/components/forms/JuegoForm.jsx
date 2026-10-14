@@ -27,9 +27,9 @@ export function JuegoForm({ juego, catalogo, juegos, onGuardar, onCancelar, onEr
       .map((p) => ({ parametro_id: p.parametro_id, nombre: p.nombre, tipo: p.tipo, es_ranking: !!p.es_ranking, direccion: p.direccion || 'desc' }))
   )
 
-  const juegoTieneRecords = editando && ((juego?.total_scores_all ?? juego?.total_scores ?? 0) > 0)
+  const juegoTieneRecords = editando
   const parametrosInicialesSet = useMemo(
-    () => new Set((juego?.parametros || []).map((p) => p.parametro_id)),
+    () => new Set((juego?.parametros || []).filter((p) => p.con_valores).map((p) => p.parametro_id)),
     [juego]
   )
 
@@ -47,7 +47,7 @@ export function JuegoForm({ juego, catalogo, juegos, onGuardar, onCancelar, onEr
   }
   function quitarParametro(id) {
     if (juegoTieneRecords && parametrosInicialesSet.has(id)) {
-      onError('No se puede quitar un parámetro de un juego que ya tiene récords guardados')
+      onError('No se puede quitar un parámetro que ya tiene valores guardados')
       return
     }
     setSeleccion(seleccion.filter((s) => s.parametro_id !== id))
@@ -266,7 +266,7 @@ export function JuegoForm({ juego, catalogo, juegos, onGuardar, onCancelar, onEr
                   type="button"
                   className="borrar sm bloqueado"
                   disabled
-                  title="No se puede quitar: este juego ya tiene récords guardados"
+                  title="No se puede quitar: este parámetro ya tiene valores guardados"
                 >
                   🔒
                 </button>
