@@ -15,7 +15,7 @@ try {
         JOIN usuarios u ON u.id = p.usuario_id
         JOIN juegos j ON j.id = p.juego_id
         LEFT JOIN torneos t ON t.id = p.torneo_id
-        ORDER BY p.creado_en DESC, p.id DESC
+        ORDER BY p.fecha DESC, p.creado_en DESC, p.id DESC
         LIMIT $limite
     ")->fetchAll();
 
