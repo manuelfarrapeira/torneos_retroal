@@ -1,0 +1,86 @@
+/* Decoración de Navidad: capa fija, no interactiva, por encima del fondo y por debajo de popups/modales. */
+.navidad {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+.navidad > * { position: absolute; }
+
+.nv-tinte { inset: 0; background: radial-gradient(ellipse at center, rgba(0, 20, 40, 0) 40%, rgba(5, 25, 60, 0.28) 100%); }
+.nv-nieve { inset: 0; width: 100%; height: 100%; }
+
+/* Guirnalda de luces */
+.nv-luces { top: 0; left: 0; right: 0; height: 46px; }
+.nv-cable { position: absolute; inset: 0; }
+.nv-bombilla {
+  position: absolute;
+  width: 9px;
+  height: 13px;
+  margin-left: -4px;
+  border-radius: 50% 50% 55% 55%;
+  background: var(--c);
+  box-shadow: 0 0 8px 2px var(--c);
+  animation: nv-parpadeo 1.8s ease-in-out infinite;
+}
+.nv-bombilla::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 2px;
+  width: 5px;
+  height: 5px;
+  background: #1c3a22;
+  border-radius: 1px;
+}
+@keyframes nv-parpadeo {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px 3px var(--c); }
+  50% { opacity: 0.35; box-shadow: 0 0 3px 0 var(--c); }
+}
+
+/* Bolas colgantes */
+.nv-bola {
+  top: 0;
+  width: 26px;
+  height: 31px;
+  padding-top: var(--len);
+  box-sizing: content-box;
+  transform-origin: 50% 0;
+  animation: nv-balanceo 3.6s ease-in-out infinite alternate;
+}
+.nv-hilo { position: absolute; top: 0; left: 50%; width: 1px; height: var(--len); background: rgba(255, 255, 255, 0.6); }
+@keyframes nv-balanceo { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+
+/* Papá Noel con su trineo: cruza la pantalla cada 40 s (tarda ~16 s en pasar) */
+.nv-trineo {
+  top: 14%;
+  left: 0;
+  width: 360px;
+  height: 90px;
+  transform: translateX(-420px);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+  animation: nv-vuelo 40s linear infinite 4s;
+}
+.nv-giro, .nv-giro svg { width: 100%; height: 100%; }
+.nv-trineo svg { animation: nv-vaiven 1.6s ease-in-out infinite alternate; }
+.nv-patas { animation: nv-galope 0.35s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center top; }
+@keyframes nv-vuelo {
+  0% { transform: translateX(var(--desde, -420px)); }
+  40%, 100% { transform: translateX(var(--hasta, calc(100vw + 60px))); }
+}
+@keyframes nv-vaiven { from { transform: translateY(-8px) rotate(-2deg); } to { transform: translateY(8px) rotate(2deg); } }
+@keyframes nv-galope { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+.nv-nariz { animation: nv-nariz 1.4s ease-in-out infinite alternate; }
+@keyframes nv-nariz { from { opacity: 0.6; } to { opacity: 1; } }
+
+@media (max-width: 768px) {
+  .nv-trineo { width: 220px; height: 55px; top: 12%; }
+  .nv-luces { height: 30px; }
+  .nv-bombilla { width: 6px; height: 9px; margin-left: -3px; }
+  .nv-bola { width: 18px; height: 22px; }
+  .nv-bola:nth-of-type(n+5) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navidad *, .navidad { animation: none !important; }
+}

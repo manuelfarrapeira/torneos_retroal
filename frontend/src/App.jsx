@@ -7,6 +7,7 @@ import { API_AUTH, API_CLASIFICACION, API_COPIAR_TORNEITO, API_JUEGOS, API_NORMA
 import { BannerPlaceholder } from './components/common/BannerPlaceholder'
 import { AsyncImage, esMediaMp4 } from './components/common/AsyncImage'
 import { Halloween } from './components/common/Halloween'
+import { Navidad } from './components/common/Navidad'
 import { DropZone } from './components/common/DropZone'
 import { LogoThumb } from './components/common/LogoThumb'
 import { SelectorJuego } from './components/common/SelectorJuego'
@@ -29,7 +30,7 @@ import { RankingTable } from './components/tables/RankingTable'
 import { SuperGeneralTable, calcularClasificacionGeneralSuper } from './components/tables/SuperGeneralTable'
 import { useDragScroll } from './hooks/useDragScroll'
 import { JUEGOS_DEMO, TIPO_LABEL } from './utils/constants'
-import { fechaLarga, esTemporadaHalloween } from './utils/date'
+import { fechaLarga, esTemporadaHalloween, esTemporadaNavidad } from './utils/date'
 import { fileToDataUrl } from './utils/file'
 import { formatearNombreJuegoClasificacion, formatearValorParam } from './utils/format'
 import { normalizarTexto } from './utils/text'
@@ -1400,6 +1401,7 @@ export default function App() {
 
       <div className="cabinet">
         {esTemporadaHalloween() && <Halloween />}
+        {esTemporadaNavidad() && <Navidad />}
         {/* Marquesina: muestra los juegos creados (o clásicos de ejemplo si aún no hay ninguno) */}
         <div className="marquee-top">
           <div className="marquee-track">

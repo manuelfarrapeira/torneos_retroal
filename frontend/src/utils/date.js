@@ -9,6 +9,15 @@ export function esTemporadaHalloween(fecha = new Date()) {
   return (mes === 10 && dia >= 28) || (mes === 11 && dia < 2)
 }
 
+// Skin de Navidad activa cada año del 20 de diciembre al 6 de enero (el 7 de enero ya no).
+// Previsualización fuera de fechas: abrir la web con ?skin=navidad.
+export function esTemporadaNavidad(fecha = new Date()) {
+  const mes = fecha.getMonth() + 1
+  const dia = fecha.getDate()
+  if ((mes === 12 && dia >= 20) || (mes === 1 && dia < 7)) return true
+  return typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('skin') === 'navidad'
+}
+
 export function fechaLarga(iso) {
   if (!iso) return ''
   const [a, m, d] = iso.split('-')
