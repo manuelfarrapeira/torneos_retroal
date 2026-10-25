@@ -2,11 +2,11 @@ export function hoyISO() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// Skin de Halloween activa cada año del 28 de octubre al 1 de noviembre (el 2 de noviembre ya no)
+// Skin de Halloween activa cada año del 26 de octubre al 1 de noviembre (el 2 de noviembre ya no)
 export function esTemporadaHalloween(fecha = new Date()) {
   const mes = fecha.getMonth() + 1
   const dia = fecha.getDate()
-  return (mes === 10 && dia >= 28) || (mes === 11 && dia < 2)
+  return (mes === 10 && dia >= 26) || (mes === 11 && dia < 2)
 }
 
 // Skin de Navidad activa cada año del 20 de diciembre al 6 de enero (el 7 de enero ya no).
