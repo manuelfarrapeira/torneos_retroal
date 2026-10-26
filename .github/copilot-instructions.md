@@ -23,9 +23,9 @@ puntuación configurables, torneos mensuales, retos y supertorneos.
   si ves referencias a la ruta antigua en documentación vieja, están obsoletas).
 - **Remoto GitHub**: `https://github.com/manuelfarrapeira/torneos_retroal.git`
   (rama `main`).
-- **Destino en producción (NAS)**: `\\nas_farra\web\codefm\retroal`
-  (= `/volume1/web/codefm/retroal` visto por SSH desde el propio NAS).
-- **Base de datos de producción**: `\\nas_farra\web\codefm\retroal\data\tareas.db`
+- **Destino en producción (NAS)**: `\\nas_farra\web\codefm`
+  (= `/volume1/web/codefm` visto por SSH desde el propio NAS).
+- **Base de datos de producción**: `\\nas_farra\web\codefm\data\tareas.db`
   (SQLite). Esa misma base de datos la comparte otra app distinta
   ("Mis Tareas", tabla `tareas`) — no tocar esa tabla.
 - **Acceso al NAS**: Debes de usar el MCP `ssh-nas`.
@@ -36,7 +36,7 @@ puntuación configurables, torneos mensuales, retos y supertorneos.
    explícitamente para ese cambio concreto.** Deja los cambios en el
    working directory sin commitear salvo petición expresa.
 2. **NUNCA uses `robocopy /MIR` (ni `/PURGE`) contra la raíz
-   `\\nas_farra\web\codefm\retroal\`.** Ahí conviven `api/` (backend),
+   `\\nas_farra\web\codefm\`.** Ahí conviven `api/` (backend),
    `data/` (BD de producción) y `uploads/` (imágenes de usuarios), que NO
    están en `frontend/dist`. Un `/MIR` a la raíz ya borró esas tres carpetas
    una vez (24/sep/2026) sin posibilidad de recuperación (sin papelera ni
@@ -62,7 +62,7 @@ powershell -ExecutionPolicy Bypass -File deploy.ps1
 
 Qué hace `deploy.ps1`:
 1. `npm run build` dentro de `frontend/`.
-2. `robocopy frontend\dist\assets \\nas_farra\web\codefm\retroal\assets /MIR`
+2. `robocopy frontend\dist\assets \\nas_farra\web\codefm\assets /MIR`
    (con guard de seguridad que aborta si la ruta destino no termina en
    `\assets`) — limpia hashes de builds anteriores de Vite.
 3. Copia (`Copy-Item -Force`, sin `/MIR`) los ficheros raíz de `dist/`
@@ -70,7 +70,7 @@ Qué hace `deploy.ps1`:
 
 Si solo se tocó el **backend** (`backend/api/*.php`), no hace falta build:
 copiar directamente el/los `.php` modificados a
-`\\nas_farra\web\codefm\retroal\api\` con `Copy-Item`, y si es posible
+`\\nas_farra\web\codefm\api\` con `Copy-Item`, y si es posible
 verificar con `php -l` por SSH (`ssh-nas`) que no hay errores de sintaxis.
 
 ## Desarrollo local

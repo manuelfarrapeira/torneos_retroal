@@ -21,9 +21,9 @@ puntuación configurables por juego y las puntuaciones registradas.
 - **Carpeta de trabajo local**: `C:\Users\mfarr\Dropbox\GITHUB\tornoes_retroal`
   (antes `C:\Users\mfarr\Dropbox\php\retroal`, movido el 30/09/2026 y conectado
   a GitHub — ver `.github/copilot-instructions.md` para más detalle)
-- **Destino en producción (NAS)**: `\\nas_farra\web\codefm\retroal`
-  (equivale a `/volume1/web/codefm/retroal` visto desde el propio NAS por SSH)
-- **Base de datos en producción**: `\\nas_farra\web\codefm\retroal\data\tareas.db`
+- **Destino en producción (NAS)**: `\\nas_farra\web\codefm`
+  (equivale a `/volume1/web/codefm` visto desde el propio NAS por SSH)
+- **Base de datos en producción**: `\\nas_farra\web\codefm\data\tareas.db`
   (SQLite). ⚠️ Esa misma base de datos la comparte otra app distinta
   ("Mis Tareas", tabla `tareas`) — no tocar esa tabla al hacer cambios de esta app.
 - **Acceso al NAS por SSH**: MCP `ssh-nas` (host `192.168.18.10`, puerto `33`,
@@ -38,10 +38,10 @@ puntuación configurables por juego y las puntuaciones registradas.
    cd frontend
    npm run build
    ```
-   y copiar el contenido de `frontend/dist/` a `\\nas_farra\web\codefm\retroal\`.
+   y copiar el contenido de `frontend/dist/` a `\\nas_farra\web\codefm\`.
 
    🚨 **PROHIBIDO usar `robocopy ... /MIR` (ni `/PURGE`) contra la raíz
-   `\\nas_farra\web\codefm\retroal\`.** `/MIR` borra en el destino cualquier
+   `\\nas_farra\web\codefm\`.** `/MIR` borra en el destino cualquier
    archivo/carpeta que no exista en el origen (`frontend/dist`), y en esa raíz
    viven `api/` (backend PHP), `data/` (la base de datos SQLite en producción)
    y `uploads/` (logos y capturas subidos) — **ninguno de los tres está en
@@ -49,7 +49,7 @@ puntuación configurables por juego y las puntuaciones registradas.
    (24/sep/2026), destruyendo la base de datos de producción sin backup
    posible (no hay papelera de reciclaje ni snapshots activados en el NAS).
    Usar siempre uno de estos métodos, más seguros, para copiar el frontend:
-   - `robocopy frontend\dist \\nas_farra\web\codefm\retroal /E` (sin `/MIR`
+   - `robocopy frontend\dist \\nas_farra\web\codefm /E` (sin `/MIR`
      ni `/PURGE`) — solo añade/actualiza archivos, nunca borra nada fuera de
      `dist`.
    - O copiar solo la subcarpeta `assets/` + `index.html` con `Copy-Item`.
@@ -57,7 +57,7 @@ puntuación configurables por juego y las puntuaciones registradas.
      subcarpeta `assets\` (`robocopy frontend\dist\assets ...\assets /MIR`),
      nunca a la raíz del proyecto en el NAS.
 2. Si se tocó el **backend** (`backend/api/*.php`): copiar los `.php`
-   modificados directamente a `\\nas_farra\web\codefm\retroal\api\` (no
+   modificados directamente a `\\nas_farra\web\codefm\api\` (no
    necesitan compilación) y, si es posible, comprobar con `php -l` por SSH que
    no hay errores de sintaxis antes/después de copiar.
 3. Nunca dar el trabajo por terminado sin haber publicado el cambio en el NAS
@@ -152,7 +152,7 @@ retroal/
 - El acceso SFTP de la MCP `ssh-nas` no funciona en este NAS (falla el
   subsistema SFTP). Para copiar archivos sueltos del backend, usar en su
   lugar `Copy-Item` de PowerShell contra la ruta SMB
-  `\\nas_farra\web\codefm\retroal\...` (o `robocopy` para carpetas), y usar
+  `\\nas_farra\web\codefm\...` (o `robocopy` para carpetas), y usar
   `ssh_exec` + `sqlite3`/`php -l` para todo lo que requiera ejecutar comandos
   en el propio NAS.
 

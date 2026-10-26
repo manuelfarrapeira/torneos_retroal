@@ -64,7 +64,7 @@ Esto genera la carpeta `frontend/dist/` con la web estática.
 
 ## 3. Desplegar en Web Station
 
-En producción se usa `\\nas_farra\web\codefm\retroal` (= `/volume1/web/codefm/retroal`
+En producción se usa `\\nas_farra\web\codefm` (= `/volume1/web/codefm`
 visto desde el NAS). Estructura:
 
 ```
