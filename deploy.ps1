@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $frontendDir = Join-Path $root 'frontend'
 $distDir = Join-Path $frontendDir 'dist'
-$nasDest = '\\nas_farra\web\codefm'
+$nasDest = '\\nas_farra\web\codefm\retroal_pruebas'
 
 Write-Host "==> Compilando frontend..." -ForegroundColor Cyan
 Push-Location $frontendDir

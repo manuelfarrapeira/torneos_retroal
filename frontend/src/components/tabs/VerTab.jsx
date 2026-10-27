@@ -430,7 +430,12 @@ export function VerTab({
               <div className="supertorneo-layout">
                 <div className="supertorneo-col-general">
                   <SuperGeneralTable generalStandings={calcularClasificacionGeneralSuper(selTorneo, torneoTodasScores, juegos)} />
-                </div>
+                                    {selTorneo.caratula_reto && (
+                                      <div className="reto-caratula-debajo-screenshot">
+                                        <AsyncImage src={selTorneo.caratula_reto} alt="Carátula del supertorneo" className="reto-caratula-grande" />
+                                      </div>
+                                    )}
+                                  </div>
 
                 <div className="supertorneo-col-juego">
                   {selTorneo.juegos.length > 0 && (

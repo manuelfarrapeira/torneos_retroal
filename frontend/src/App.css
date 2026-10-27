@@ -3094,8 +3094,8 @@ video.shot-thumb {
   box-sizing: border-box;
 }
 .supertorneo-col-general {
-  flex: 0 0 380px;
-  min-width: 340px;
+  flex: 0 0 420px;
+  min-width: 380px;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -3133,8 +3133,29 @@ video.shot-thumb {
 }
 
 .super-general-ranking .ranking-body {
-  max-height: none;
-  overflow-y: visible;
+  /* Cabecera (36px) + 10 filas (44px): a partir de la 11ª puntuación hay scroll */
+  max-height: 476px;
+  overflow-y: auto;
+}
+
+.super-general-ranking .super-general-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.super-general-ranking .super-general-fila {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.super-general-ranking .super-general-fila .ini {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .super-general-ranking .super-general-head,
@@ -3145,8 +3166,8 @@ video.shot-thumb {
 }
 
 .super-general-ranking .fila {
-  padding-top: 12px;
-  padding-bottom: 12px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* Ranking de juegos en la columna derecha de Supertorneos: máximo 10 filas de récords antes de hacer scroll */

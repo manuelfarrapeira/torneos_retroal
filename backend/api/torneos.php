@@ -151,6 +151,10 @@ try {
                 if ($logo) {
                     $db->prepare('UPDATE torneos SET logo = :l WHERE id = :id')->execute([':l' => $logo, ':id' => $newId]);
                 }
+                $car = $tipo === 'super' ? guardarImagen($in['caratula'] ?? null, $newId, 'caratula_super') : null;
+                if ($car) {
+                    $db->prepare('UPDATE torneos SET caratula_reto = :c WHERE id = :id')->execute([':c' => $car, ':id' => $newId]);
+                }
                 $db->commit();
             } catch (Throwable $e) {
                 $db->rollBack();
@@ -207,6 +211,17 @@ try {
                     $nuevo = guardarImagen($in['logo'], $id, 'super');
                     borrarImagen($actual['logo']);
                     $db->prepare('UPDATE torneos SET logo = :l WHERE id = :id')->execute([':l' => $nuevo, ':id' => $id]);
+                }
+                // Carátula del supertorneo (columna caratula_reto).
+                if ($tipo === 'super') {
+                    if (!empty($in['caratula_borrar'])) {
+                        borrarImagen($actual['caratula_reto']);
+                        $db->prepare('UPDATE torneos SET caratula_reto = NULL WHERE id = :id')->execute([':id' => $id]);
+                    } elseif (!empty($in['caratula'])) {
+                        $nuevaCar = guardarImagen($in['caratula'], $id, 'caratula_super');
+                        borrarImagen($actual['caratula_reto']);
+                        $db->prepare('UPDATE torneos SET caratula_reto = :c WHERE id = :id')->execute([':c' => $nuevaCar, ':id' => $id]);
+                    }
                 }
                 $db->commit();
             } catch (Throwable $e) {

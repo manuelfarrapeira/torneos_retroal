@@ -31,6 +31,20 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
   const [caraturaBorrar, setCaraturaBorrar] = useState(false)
   const [caraturaPreview, setCaraturaPreview] = useState(editando && torneo.tipo === 'mensual' ? (torneo.caratula_reto || null) : null)
 
+  // Carátula del supertorneo (se muestra bajo la clasificación general)
+  const [caratulaSuperData, setCaratulaSuperData] = useState(null)
+  const [caratulaSuperPreview, setCaratulaSuperPreview] = useState(editando && torneo.tipo === 'super' ? (torneo.caratula_reto || null) : null)
+  const [caratulaSuperBorrar, setCaratulaSuperBorrar] = useState(false)
+
+  async function procesarCaratulaSuperFile(f) {
+    if (!f) return
+    try {
+      const url = await fileToDataUrl(f)
+      setCaratulaSuperData(url); setCaratulaSuperPreview(url); setCaratulaSuperBorrar(false)
+    } catch (err) { onError(err?.message || 'Error al leer la carátula') }
+  }
+  function quitarCaratulaSuper() { setCaratulaSuperData(null); setCaratulaSuperPreview(null); setCaratulaSuperBorrar(true) }
+
   async function procesarLogoTorneoFile(f) {
     if (!f) return
     try {
@@ -100,6 +114,8 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
       const payload = { tipo, nombre: nombre.trim(), juegos: juegosSel }
       if (logoData) payload.logo = logoData
       if (logoBorrar) payload.logo_borrar = true
+      if (caratulaSuperData) payload.caratula = caratulaSuperData
+      if (caratulaSuperBorrar) payload.caratula_borrar = true
       onGuardar(payload, editando ? torneo.id : null)
     }
   }
@@ -180,6 +196,21 @@ export function TorneoForm({ torneo, juegos, onGuardar, onCancelar, onError, onC
                 <input type="file" accept="image/*" onChange={onLogoTorneoChange} hidden />
               </label>
               {logoPreview && <button type="button" className="btn-secundario" onClick={quitarLogoTorneo}>QUITAR</button>}
+            </div>
+          </div>
+          <div className="img-upload img-upload-reto">
+            <span className="img-upload-lbl">CARÁTULA (opcional, se ve bajo la puntuación general)</span>
+            <DropZone accept="image/*" onFileSelect={procesarCaratulaSuperFile}>
+              <div className="img-preview">
+                {caratulaSuperPreview ? <img src={caratulaSuperPreview} alt="Carátula del supertorneo" /> : <span className="img-vacio">Sin carátula<br/><small style={{ fontSize: '9px', opacity: 0.7 }}>(Arrastra imagen)</small></span>}
+              </div>
+            </DropZone>
+            <div className="img-upload-acciones">
+              <label className="btn-file">
+                SUBIR
+                <input type="file" accept="image/*" onChange={(e) => procesarCaratulaSuperFile(e.target.files[0])} hidden />
+              </label>
+              {caratulaSuperPreview && <button type="button" className="btn-secundario" onClick={quitarCaratulaSuper}>QUITAR</button>}
             </div>
           </div>
           <p className="form-ayuda">
